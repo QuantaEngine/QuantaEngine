@@ -1,0 +1,31 @@
+name: minimal-scalar-universe
+constants:
+  - name: fine_structure_alpha
+    value: 0.0072973525693
+    unit: dimensionless
+    description: Electromagnetic coupling strength at low energy.
+  - name: electroweak_scale
+    value: 246.0
+    unit: GeV
+    description: Higgs vacuum expectation value scale.
+  - name: qcd_scale
+    value: 0.2
+    unit: GeV
+    description: Approximate confinement scale placeholder.
+fields:
+  - name: phi
+    kind: scalar
+    mass: 0.2
+    spin: 0.0
+    description: Toy scalar order-parameter field.
+couplings:
+  - name: lambda
+    fields: [phi]
+    strength: 0.05
+    operator: phi^4
+    description: Stabilizing self-interaction.
+symmetries:
+  - translation
+  - rotation
+  - Z2(phi -> -phi)
+notes: Minimal first-principles-style law description for QuantaEngine v0.1.

@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: QuantaEngine
+type: software
+message: "If you use QuantaEngine in academic work, please cite the repository."
+authors:
+  - name: QuantaEngine contributors
+version: 0.1.0
+license: MIT
+date-released: 2026-06-19
