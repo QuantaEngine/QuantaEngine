@@ -1,0 +1,48 @@
+theory_id: T-0001
+name: Conservative-EFT Universe Compiler
+family: conservative_eft
+version: 0.1.0
+parent_id: null
+
+engine: AnalyticCompiler
+base_config: configs/standard_universe.yaml
+
+philosophy:
+  summary: "Known physics, effective theory layers; prioritize internal consistency, benchmark fidelity, reproducibility."
+  conservatism: 0.90
+  novelty: 0.20
+  computational_efficiency: 0.70
+  bottom_up_derivation: 0.85
+  empirical_fidelity: 0.90
+
+axioms:
+  spacetime_dimensions: 4
+  lorentz_invariance: true
+  action_principle: true
+  gravity: friedmann_gr
+
+claims:
+  - claim_id: C-atom-001
+    statement: "Stable hydrogen exists if 0 < alpha < 1 with positive masses and binding energy."
+    confidence: 0.85
+    falsifiability: 0.95
+  - claim_id: C-star-001
+    statement: "Long-lived stars require stable light nuclei and a moderate gravity scale."
+    confidence: 0.70
+    falsifiability: 0.80
+
+known_limits:
+  - "Does not solve full QCD or full stellar evolution."
+  - "Life score is a physical window score, not a probability of life."
+
+defense_prior:
+  default_stance: defend
+  conservatism: 0.90
+  novelty_preference: 0.20
+  minimum_evidence_threshold: 0.70
+
+lineage_policy:
+  allow_patch: true
+  allow_fork: true
+  allow_merge: false
+  preserve_parent: true

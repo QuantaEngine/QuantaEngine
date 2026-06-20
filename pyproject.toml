@@ -53,6 +53,8 @@ dev = [
 [project.scripts]
 quanta = "quanta_engine.cli:main"
 quantaengine = "quantaengine.cli:main"
+cosmogenesis = "cosmogenesis.cli:main"
+genesis-arena = "genesis_arena.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

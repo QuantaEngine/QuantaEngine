@@ -1,0 +1,48 @@
+theory_id: T-0002
+name: Exploratory Generative Universe Engine
+family: exploratory_generative
+version: 0.1.0
+parent_id: null
+
+engine: VariationalRelaxer
+base_config: configs/standard_universe.yaml
+
+philosophy:
+  summary: "Treat a universe as a fixed point of coupled constraints; reward valid non-standard universes and generative diversity while keeping hard self-consistency."
+  conservatism: 0.45
+  novelty: 0.90
+  computational_efficiency: 0.65
+  bottom_up_derivation: 0.55
+  empirical_fidelity: 0.50
+
+axioms:
+  spacetime_dimensions: 4
+  lorentz_invariance: soft_required
+  action_principle: true
+  gravity: parameterized_friedmann
+
+claims:
+  - claim_id: C-diversity-001
+    statement: "A universe theory should be rewarded for producing multiple self-consistent non-standard universes, not only reproducing ours."
+    confidence: 0.65
+    falsifiability: 0.70
+  - claim_id: C-consistency-001
+    statement: "A universe must satisfy a global cross-layer self-consistency residual, not only per-layer windows."
+    confidence: 0.70
+    falsifiability: 0.75
+
+known_limits:
+  - "Less conservative than T-0001; relies on soft windows."
+  - "Requires verifier checks to avoid overclaiming complexity."
+
+defense_prior:
+  default_stance: defend
+  conservatism: 0.45
+  novelty_preference: 0.90
+  minimum_evidence_threshold: 0.60
+
+lineage_policy:
+  allow_patch: true
+  allow_fork: true
+  allow_merge: false
+  preserve_parent: true

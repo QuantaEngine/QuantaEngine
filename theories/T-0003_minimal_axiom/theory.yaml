@@ -1,0 +1,46 @@
+theory_id: T-0003
+name: Minimal-Axiom Dimensional Universe
+family: minimal_axiom
+version: 0.1.0
+parent_id: null
+
+engine: MinimalAxiomDimensional
+base_config: configs/standard_universe.yaml
+
+philosophy:
+  summary: "Derive feasibility from the fewest dimensionless numbers (alpha, alpha_G, mass ratio) via anthropic inequalities; no layered pipeline, no fixed point."
+  conservatism: 0.55
+  novelty: 0.60
+  computational_efficiency: 0.95
+  bottom_up_derivation: 0.95
+  empirical_fidelity: 0.60
+
+axioms:
+  dimensional_analysis_only: true
+  anthropic_inequalities: carr_rees
+  free_parameters: 3
+
+claims:
+  - claim_id: C-minimal-001
+    statement: "Universe feasibility is captured by alpha, the gravitational coupling alpha_G, and the electron-proton mass ratio."
+    confidence: 0.60
+    falsifiability: 0.85
+  - claim_id: C-hierarchy-001
+    statement: "Stars and structure require sqrt(alpha_G)/alpha << 1 (gravitating objects vastly larger than atoms)."
+    confidence: 0.70
+    falsifiability: 0.80
+
+known_limits:
+  - "Order-of-magnitude only; ignores detailed nuclear and cosmological dynamics."
+
+defense_prior:
+  default_stance: defend
+  conservatism: 0.55
+  novelty_preference: 0.60
+  minimum_evidence_threshold: 0.65
+
+lineage_policy:
+  allow_patch: true
+  allow_fork: true
+  allow_merge: false
+  preserve_parent: true

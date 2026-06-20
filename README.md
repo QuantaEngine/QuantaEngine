@@ -70,6 +70,78 @@ print(report.to_markdown())
 print(report.to_json_dict()["complexity"])
 ```
 
+## Adversarial Cosmogenesis (two co-trained paradigms)
+
+The `cosmogenesis` package generates a self-consistent universe with **two
+independent paradigms** that optimize separately yet co-train adversarially:
+
+- **Scheme A** — the analytic forward-pass compiler above (transparent closed-form
+  layers, hard windows, white-box sensitivity ascent).
+- **Scheme B** — a from-scratch *variational self-consistency relaxation*: emergent
+  scales come from extremizing balance functionals, windows are soft logistics,
+  and a cross-layer **self-consistency residual** plus a fixed-point relaxation can
+  flag a universe as internally inconsistent even when every single window passes —
+  something A's one-pass model cannot detect. It optimizes with an evolution strategy.
+
+Both consume the **same** `UniverseConfig` / parameter vector (shared entry point)
+and return a common `UniverseAssessment`. Each round they optimize, cross-evaluate,
+**critique the other's champion**, and **consider** the other's suggested fix (A
+adopts B's self-consistency residual as a regularizer; B adopts A's hard-window and
+robustness concerns), converging on a consensus universe robust under both views.
+
+```bash
+python -m cosmogenesis run-adversarial \
+  --base configs/standard_universe.yaml --rounds 6 --out reports/adversarial
+```
+
+```python
+from cosmogenesis import run_adversarial
+
+result = run_adversarial("configs/standard_universe.yaml", rounds=6, out_dir="reports/adversarial")
+print(result.consensus_vector, result.consensus_score_a, result.consensus_score_b)
+```
+
+Design rationale: [docs/design/ADVERSARIAL_COSMOGENESIS.md](docs/design/ADVERSARIAL_COSMOGENESIS.md).
+
+## GenesisArena — parallel multi-theory adversarial platform (v2)
+
+`genesis_arena` generalizes the two-scheme arena into a **parallel ecosystem of
+independent theory lineages** that challenge each other but are **never merged
+into a single winner**. It builds on three genuinely different physics paradigms
+(the `cosmogenesis` engines):
+
+| Theory | Family | Engine | Paradigm |
+|---|---|---|---|
+| `T-0001` | `conservative_eft` | `AnalyticCompiler` | forward closed-form, white-box |
+| `T-0002` | `exploratory_generative` | `VariationalRelaxer` | self-consistency fixed point |
+| `T-0003` | `minimal_axiom` | `MinimalAxiomDimensional` | Carr–Rees anthropic inequalities, fewest parameters |
+
+Each round theories **attack** each other with schema-validated `ChallengeCard`s,
+**defend** per their `DefensePrior`, are judged by a **deterministic Verifier +
+Judge**, and are **patched / forked / left unchanged** by a `PatchGate` that
+preserves parents and forbids merging. Selection keeps a **Pareto front + family
+elites + novelty archive** (no single-score winner-takes-all), and evolution runs
+theories and duels **in parallel**.
+
+```bash
+python -m genesis_arena theory-list
+python -m genesis_arena duel theories/T-0001_conservative_eft/theory.yaml \
+                             theories/T-0002_exploratory_generative/theory.yaml --rounds 1
+python -m genesis_arena evolve --generations 3 --min-families 3 --no-merge \
+                               --out reports/genesis_arena
+```
+
+```python
+from genesis_arena import TheoryRegistry, evolve
+
+registry = TheoryRegistry.from_dir("theories")
+report = evolve(registry.all(), registry, generations=3, min_families=3, out_dir="reports/genesis_arena")
+print(report.final_families, report.allow_merge)  # multiple families survive; never merged
+```
+
+Design rationale: [plans/2026-06-21-GENESIS_ARENA_V2_PARALLEL_ADVERSARIAL.md](plans/2026-06-21-GENESIS_ARENA_V2_PARALLEL_ADVERSARIAL.md)
+(improves on [plans/2026-06-21-ADVERSARIAL_SELF_PLAY_IMPLEMENTATION.md](plans/2026-06-21-ADVERSARIAL_SELF_PLAY_IMPLEMENTATION.md)).
+
 ## Configuration Inheritance
 
 Variant universes inherit a complete parent and override only selected values:

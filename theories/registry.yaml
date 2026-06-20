@@ -1,0 +1,20 @@
+# GenesisArena theory registry.
+# Each entry is an independent lineage; theories are NEVER merged.
+theories:
+  - id: T-0001
+    family: conservative_eft
+    engine: AnalyticCompiler
+    path: T-0001_conservative_eft/theory.yaml
+  - id: T-0002
+    family: exploratory_generative
+    engine: VariationalRelaxer
+    path: T-0002_exploratory_generative/theory.yaml
+  - id: T-0003
+    family: minimal_axiom
+    engine: MinimalAxiomDimensional
+    path: T-0003_minimal_axiom/theory.yaml
+
+policy:
+  allow_merge: false
+  preserve_parent: true
+  min_families: 3
