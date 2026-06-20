@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "plan_id": "quantaengine-mvp-v1",
+  "acceptance_passed": true,
+  "tooling": {
+    "pytest": {
+      "passed": true,
+      "command": [
+        "C:\\Users\\lake\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-m",
+        "pytest"
+      ],
+      "summary": "45 passed in 2.62s"
+    },
+    "ruff": {
+      "passed": true,
+      "command": [
+        "C:\\Users\\lake\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "src",
+        "tests",
+        "examples",
+        "plans/quantaengine-mvp-v1/execution"
+      ],
+      "summary": "All checks passed!"
+    },
+    "format": {
+      "passed": true,
+      "command": [
+        "C:\\Users\\lake\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "src/quanta_engine",
+        "tests",
+        "examples",
+        "plans/quantaengine-mvp-v1/execution"
+      ],
+      "summary": "67 files already formatted"
+    },
+    "mypy": {
+      "passed": true,
+      "command": [
+        "C:\\Users\\lake\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-m",
+        "mypy",
+        "src/quanta_engine"
+      ],
+      "summary": "Success: no issues found in 44 source files"
+    },
+    "dependencies": {
+      "passed": true,
+      "command": [
+        "C:\\Users\\lake\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "summary": "No broken requirements found."
+    }
+  },
+  "assertions": {
+    "standard_required_flags": true,
+    "standard_binding_energy": true,
+    "standard_bohr_radius": true,
+    "standard_universe_age": true,
+    "standard_life_window": true,
+    "atomless_hydrogen": true,
+    "atomless_life_window": true,
+    "strong_gravity_long_lived": true,
+    "strong_gravity_lifetime": true,
+    "smooth_structure": true,
+    "smooth_galaxies": true,
+    "smooth_planets": true,
+    "alpha_scan_rows": true,
+    "gravity_scan_rows": true
+  },
+  "scenarios": {
+    "standard": {
+      "validation_passed": true,
+      "stable_hydrogen": true,
+      "hydrogen_binding_energy_eV": 13.598287264362614,
+      "bohr_radius_m": 5.2946540949254714e-11,
+      "deuteron_stable": true,
+      "helium4_stable": true,
+      "universe_age_Gyr": 13.802879935186507,
+      "hydrogen_fusion_possible": true,
+      "long_lived_stars_possible": true,
+      "stellar_lifetime_years": 10000000000.0,
+      "structure_growth_possible": true,
+      "galaxy_formation_possible": true,
+      "planet_formation_possible": true,
+      "life_window_score": 0.9997236589148026,
+      "civilization_potential_score": 0.9997236589148025,
+      "final_verdict": "civilization window plausible"
+    },
+    "no_stable_atoms": {
+      "validation_passed": false,
+      "stable_hydrogen": false,
+      "hydrogen_binding_energy_eV": 543931.4905745047,
+      "bohr_radius_m": 2.6473270474627357e-13,
+      "deuteron_stable": true,
+      "helium4_stable": true,
+      "universe_age_Gyr": 13.802879935186507,
+      "hydrogen_fusion_possible": false,
+      "long_lived_stars_possible": false,
+      "stellar_lifetime_years": 3535533.9059327375,
+      "structure_growth_possible": true,
+      "galaxy_formation_possible": true,
+      "planet_formation_possible": false,
+      "life_window_score": 0.0,
+      "civilization_potential_score": 0.0,
+      "final_verdict": "invalid"
+    },
+    "strong_gravity": {
+      "validation_passed": true,
+      "stable_hydrogen": true,
+      "hydrogen_binding_energy_eV": 13.598287264362614,
+      "bohr_radius_m": 5.2946540949254714e-11,
+      "deuteron_stable": true,
+      "helium4_stable": true,
+      "universe_age_Gyr": 13.802879935186507,
+      "hydrogen_fusion_possible": true,
+      "long_lived_stars_possible": false,
+      "stellar_lifetime_years": 1000000.0,
+      "structure_growth_possible": true,
+      "galaxy_formation_possible": true,
+      "planet_formation_possible": false,
+      "life_window_score": 0.5498979985860871,
+      "civilization_potential_score": 0.23649463225191847,
+      "final_verdict": "stellar but chemically poor"
+    },
+    "no_perturbations": {
+      "validation_passed": true,
+      "stable_hydrogen": true,
+      "hydrogen_binding_energy_eV": 13.598287264362614,
+      "bohr_radius_m": 5.2946540949254714e-11,
+      "deuteron_stable": true,
+      "helium4_stable": true,
+      "universe_age_Gyr": 13.802879935186507,
+      "hydrogen_fusion_possible": true,
+      "long_lived_stars_possible": true,
+      "stellar_lifetime_years": 10000000000.0,
+      "structure_growth_possible": false,
+      "galaxy_formation_possible": false,
+      "planet_formation_possible": false,
+      "life_window_score": 0.6748134697674918,
+      "civilization_potential_score": 0.4386287553488696,
+      "final_verdict": "life window plausible"
+    }
+  },
+  "artifacts": [
+    "reports/standard.md",
+    "reports/standard.json",
+    "reports/scan_alpha.csv",
+    "reports/scan_alpha.png",
+    "reports/scan_alpha.md",
+    "reports/scan_gravity.csv",
+    "reports/scan_gravity.png",
+    "reports/scan_gravity.md"
+  ]
+}

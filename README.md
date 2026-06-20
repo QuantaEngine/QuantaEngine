@@ -94,14 +94,14 @@ tests/                   unit, integration, CLI, scan, and E2E tests
 examples/                runnable Python demos
 reports/                 reproducible demonstration outputs
 docs/physics_assumptions.md
-plans/                   detailed execution plan
+plans/                   versioned, executable plan packages
 ```
 
 The original `quantaengine` scalar-field lattice API remains available for compatibility. New effective-universe work should use `quanta_engine` and the `quanta` CLI.
 
 ## Scientific Boundaries
 
-Every physical layer exposes assumptions, warnings, and intermediate values. See [docs/physics_assumptions.md](docs/physics_assumptions.md) for calibrated formulas and limitations, [docs/examples.md](docs/examples.md) for the acceptance scenarios, and [docs/MVP_COMPLETION.md](docs/MVP_COMPLETION.md) for the stage-by-stage verification matrix.
+Every physical layer exposes assumptions, warnings, and intermediate values. See [docs/physics_assumptions.md](docs/physics_assumptions.md) for calibrated formulas and limitations, [docs/examples.md](docs/examples.md) for the acceptance scenarios, [docs/MVP_COMPLETION.md](docs/MVP_COMPLETION.md) for the stage-by-stage verification matrix, and [plans/quantaengine-mvp-v1/README.md](plans/quantaengine-mvp-v1/README.md) for the reusable execution package.
 
 ## Development
 

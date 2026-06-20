@@ -21,11 +21,13 @@ This matrix records the implementation and verification evidence for stages 0 th
 
 The final local acceptance run produced:
 
-- `42 passed` across legacy regression tests and the new MVP suite.
+- The complete legacy and MVP test suite passes; the current count is recorded in the executable plan evidence.
 - `88%` statement coverage for `quanta_engine`.
 - Ruff checks clean and Mypy clean for all 44 new-package source files.
 - No broken installed requirements from `python -m pip check`.
 - All five Python examples completed successfully.
+
+The reusable plan package and latest machine-readable result are stored in [`plans/quantaengine-mvp-v1/`](../plans/quantaengine-mvp-v1/README.md).
 
 Standard universe checkpoints:
 

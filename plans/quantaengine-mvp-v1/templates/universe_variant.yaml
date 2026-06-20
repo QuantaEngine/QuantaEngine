@@ -1,0 +1,17 @@
+# Copy this file into configs/ and replace all TODO values.
+inherit: standard_universe.yaml
+
+universe:
+  name: TODO_unique_scenario_name
+  description: TODO state the changed law or parameter and expected physical effect.
+
+# Keep only sections and fields intentionally changed by this scenario.
+dimensionless:
+  alpha_scale: 1.0
+  gravity_scale: 1.0
+
+# Expected acceptance direction, to be moved into PLAN_MANIFEST.yaml:
+# - atomic binding energy: increase/decrease/unchanged
+# - stellar lifetime: increase/decrease/unchanged
+# - structure window: open/closed
+# - life window score: higher/lower/bounded range

@@ -23,3 +23,5 @@ jobs:
         run: python -m pytest
       - name: Generate standard universe
         run: quanta run configs/standard_universe.yaml --output reports/standard.md --json reports/standard.json
+      - name: Verify executable plan scenarios
+        run: python plans/quantaengine-mvp-v1/execution/run_acceptance.py --skip-tooling

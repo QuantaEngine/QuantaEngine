@@ -1,0 +1,72 @@
+schema_version: 1
+plan_id: quantaengine-mvp-v1
+title: QuantaEngine multi-scale effective universe MVP
+status: implemented
+canonical_plan: ../2026-06-20-QuantaEngine_PROJECT_PLAN.md
+scope:
+  included_stages: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  included_tasks: [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O]
+  excluded_roadmap: [V2, V3, V4, V5, V6]
+
+tooling:
+  - id: pytest
+    command: ["{python}", "-m", "pytest"]
+  - id: ruff
+    command: ["{python}", "-m", "ruff", "check", "src", "tests", "examples", "plans/quantaengine-mvp-v1/execution"]
+  - id: format
+    command: ["{python}", "-m", "ruff", "format", "--check", "src/quanta_engine", "tests", "examples", "plans/quantaengine-mvp-v1/execution"]
+  - id: mypy
+    command: ["{python}", "-m", "mypy", "src/quanta_engine"]
+  - id: dependencies
+    command: ["{python}", "-m", "pip", "check"]
+
+standard_acceptance:
+  config: configs/standard_universe.yaml
+  hydrogen_binding_energy_eV: [13.0, 14.0]
+  bohr_radius_m: [5.0e-11, 5.6e-11]
+  universe_age_Gyr: [10.0, 20.0]
+  minimum_life_window_score: 0.5
+  required_true:
+    - validation_passed
+    - stable_hydrogen
+    - deuteron_stable
+    - helium4_stable
+    - hydrogen_fusion_possible
+    - long_lived_stars_possible
+    - structure_growth_possible
+
+variant_acceptance:
+  no_stable_atoms:
+    config: configs/no_stable_atoms_universe.yaml
+    stable_hydrogen: false
+    maximum_life_window_score: 0.1
+  strong_gravity:
+    config: configs/strong_gravity_universe.yaml
+    long_lived_stars_possible: false
+    maximum_stellar_lifetime_years: 1000000.0
+  no_perturbations:
+    config: configs/no_perturbations_universe.yaml
+    structure_growth_possible: false
+    galaxy_formation_possible: false
+    planet_formation_possible: false
+
+scans:
+  alpha:
+    parameter: dimensionless.alpha_scale
+    values: [0.5, 0.8, 1.0, 1.2, 1.5]
+    output: reports/scan_alpha.csv
+  gravity:
+    parameter: dimensionless.gravity_scale
+    values: [0.1, 0.3, 1.0, 10.0, 100.0]
+    output: reports/scan_gravity.csv
+
+artifacts:
+  - reports/standard.md
+  - reports/standard.json
+  - reports/scan_alpha.csv
+  - reports/scan_alpha.md
+  - reports/scan_alpha.png
+  - reports/scan_gravity.csv
+  - reports/scan_gravity.md
+  - reports/scan_gravity.png
+  - plans/quantaengine-mvp-v1/records/acceptance-evidence.json
