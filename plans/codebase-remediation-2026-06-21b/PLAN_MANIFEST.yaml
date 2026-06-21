@@ -1,0 +1,106 @@
+schema_version: 1
+plan_id: codebase-remediation-2026-06-21b
+title: QuantaEngine independent assessment remediation (round B)
+status: planned
+baseline_commit: 2ab9917708b2ba1574301d48196743c4771a2282
+assessment: ../../docs/reviews/2026-06-21b-codebase-assessment.md
+remediation_report: null  # 实现并复审后补充
+
+# 本方案包只做规划，不含源码实现。每个 finding 给出拟改文件与拟加回归测试名，
+# 实现按 "先方案、后实现、再复审 verified" 流程在后续提交完成。
+
+findings:
+  - id: QE-2026-101
+    severity: P1
+    area: adversarial independent-consider loop
+    intent: 接收方在自身 objective 下独立复核攻击方建议，自证改进才采纳，绝不合并
+    planned_changes:
+      - src/cosmogenesis/arena/cards.py        # 规范 ChallengeCard.suggestion(ParameterVector)
+      - src/cosmogenesis/core/protocol.py       # BaseEngine.consider(suggestion) -> Decision
+      - src/cosmogenesis/schemes/*/engine.py    # 各方案实现独立复核（复用已退役 consider 模式）
+      - src/cosmogenesis/arena/duel.py          # 挑战后目标方独立 consider，记录采纳/拒绝
+      - src/cosmogenesis/arena/ledger.py        # history 记录 suggestion_source/considered/adopted/reason
+    planned_regression: tests/test_remediation_b.py::test_suggestion_adopted_only_if_self_verified_improvement
+  - id: QE-2026-102
+    severity: P1
+    area: scoring objective integrity
+    planned_changes:
+      - src/cosmogenesis/arena/scoring.py       # efficiency 实测、simplicity 真实计数、弱目标退出硬 Pareto
+    planned_regression: tests/test_remediation_b.py::test_scoring_objectives_are_measured_not_declared
+  - id: QE-2026-103
+    severity: P1
+    area: physics calibration and uncertainty
+    planned_changes:
+      - docs/design/PHYSICS_CALIBRATION.md      # 阈值来源/区间/敏感性基准（新增文档）
+      - src/cosmogenesis/schemes/*/engine.py    # 阈值引用化 + 不确定性接口
+    planned_regression: tests/test_remediation_b.py::test_standard_universe_within_calibrated_ranges
+  - id: QE-2026-104
+    severity: P2
+    area: assess memoization
+    planned_changes:
+      - src/cosmogenesis/arena/bridge.py        # assess 按 (theory_id,version,vector) 缓存
+    planned_regression: tests/test_remediation_b.py::test_assess_memoized_and_deterministic
+  - id: QE-2026-105
+    severity: P2
+    area: bounded novelty archive
+    planned_changes:
+      - src/cosmogenesis/arena/evolution.py     # archive 上限/衰减/去重
+      - src/cosmogenesis/arena/scoring.py
+    planned_regression: tests/test_remediation_b.py::test_novelty_archive_bounded_no_collapse
+  - id: QE-2026-106
+    severity: P2
+    area: plugin scheme registration
+    planned_changes:
+      - src/cosmogenesis/schemes/__init__.py    # 子包自动发现/entry-point 注册
+      - src/cosmogenesis/arena/patchgate.py     # reducer 冲突策略对象
+    planned_regression: tests/test_remediation_b.py::test_new_scheme_discovered_without_central_edit
+  - id: QE-2026-107
+    severity: P2
+    area: legacy retirement schedule
+    planned_changes:
+      - docs/design/DEPRECATION.md              # lattice 定位 + namespace 1.0 移除时间表（新增）
+    planned_regression: tests/test_remediation_b.py::test_deprecation_schedule_documented
+  - id: QE-2026-108
+    severity: P3
+    area: evolution convergence
+    planned_changes:
+      - src/cosmogenesis/arena/evolution.py     # 收敛指标 + 可选早停
+    planned_regression: tests/test_remediation_b.py::test_evolution_early_stops_on_stable_ecosystem
+  - id: QE-2026-109
+    severity: P3
+    area: docs drift
+    planned_changes:
+      - plans/2026-06-21-GENESIS_ARENA_V2_PARALLEL_ADVERSARIAL.md  # 加 superseded 横幅
+    planned_regression: null
+  - id: QE-2026-110
+    severity: P3
+    area: physics invariant property tests
+    planned_changes:
+      - tests/test_physics_invariants.py        # property-based 不变量（新增）
+    planned_regression: tests/test_physics_invariants.py
+
+phases:
+  - id: A
+    name: trustworthy adversarial loop
+    findings: [QE-2026-101, QE-2026-102]
+  - id: B
+    name: scientific credibility
+    findings: [QE-2026-103, QE-2026-110]
+  - id: C
+    name: performance and extensibility
+    findings: [QE-2026-104, QE-2026-105, QE-2026-106, QE-2026-108]
+  - id: D
+    name: maintenance and docs
+    findings: [QE-2026-107, QE-2026-109]
+
+acceptance_gates:
+  - command: ["{python}", "-m", "pytest"]
+  - command: ["{python}", "-m", "ruff", "check", "src", "tests"]
+  - command: ["{python}", "-m", "ruff", "format", "--check", "src", "tests"]
+  - command: ["{python}", "-m", "mypy", "src"]
+  - command: ["{python}", "plans/codebase-remediation-2026-06-21/execution/check_coverage.py"]
+
+invariants:
+  - 各方案永不合并（allow_merge 恒 False）
+  - 采纳建议必须由接收方自身模型独立判定，绝不盲从
+  - 实现不得降低既有覆盖率门槛或破坏确定性

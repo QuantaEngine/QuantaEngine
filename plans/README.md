@@ -8,6 +8,7 @@
 |---|---|---|---|
 | QuantaEngine MVP v1 | 已实现并验收 | [quantaengine-mvp-v1/README.md](quantaengine-mvp-v1/README.md) | 从有效物理参数生成粒子、原子、核、宇宙学、恒星、结构与复杂性报告 |
 | 2026-06-21 代码库修复 | 已验证 | [codebase-remediation-2026-06-21/README.md](codebase-remediation-2026-06-21/README.md) | 评估 finding 修复、回归、覆盖率、wheel 与双远端发布证据 |
+| 2026-06-21B 独立评估修复（规划） | 规划中 | [codebase-remediation-2026-06-21b/README.md](codebase-remediation-2026-06-21b/README.md) | 对抗"独立考虑建议"回路、评分目标去自报化、物理校准等 10 项 finding 的修复规划 |
 
 原始完整方案保存在 [2026-06-20-QuantaEngine_PROJECT_PLAN.md](2026-06-20-QuantaEngine_PROJECT_PLAN.md)，作为需求来源和历史基线，不随实现细节重写。
 

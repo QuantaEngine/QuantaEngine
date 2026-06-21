@@ -62,3 +62,72 @@ reviews:
         status: verified
         fixed_in: ebf7b36a3799e5ec748c75df26101313831de2e1
         category: engineering-release
+  - review_id: QE-REVIEW-2026-06-21B
+    date: 2026-06-21
+    baseline_commit: 2ab9917708b2ba1574301d48196743c4771a2282
+    report: 2026-06-21b-codebase-assessment.md
+    status: open
+    independent: true
+    remediation_plan: ../../plans/codebase-remediation-2026-06-21b/README.md
+    baseline_gates:
+      pytest: 97 passed
+      coverage_total: 95.41
+      ruff: pass
+      ruff_format: pass
+      mypy: pass
+    summary:
+      p0: 0
+      p1: 3
+      p2: 4
+      p3: 3
+    findings:
+      - id: QE-2026-101
+        severity: P1
+        status: open
+        category: adversarial-core
+        independent: true
+      - id: QE-2026-102
+        severity: P1
+        status: open
+        category: scoring-integrity
+        independent: true
+      - id: QE-2026-103
+        severity: P1
+        status: open
+        category: scientific-validity
+        references: [remediation-2026-06-21-s6, remediation-2026-06-21-s7.1]
+      - id: QE-2026-104
+        severity: P2
+        status: open
+        category: performance
+        independent: true
+      - id: QE-2026-105
+        severity: P2
+        status: open
+        category: scaling
+        independent: true
+      - id: QE-2026-106
+        severity: P2
+        status: open
+        category: extensibility
+        references: [remediation-2026-06-21-s7.2]
+      - id: QE-2026-107
+        severity: P2
+        status: open
+        category: maintenance
+        references: [remediation-2026-06-21-s6, remediation-2026-06-21-s7.3]
+      - id: QE-2026-108
+        severity: P3
+        status: open
+        category: loop-control
+        independent: true
+      - id: QE-2026-109
+        severity: P3
+        status: open
+        category: docs-drift
+        independent: true
+      - id: QE-2026-110
+        severity: P3
+        status: open
+        category: test-depth
+        independent: true
