@@ -85,3 +85,16 @@
 
 - `allow_merge` 恒 False；采纳建议必由接收方自身模型独立判定。
 - 不降低既有覆盖率门槛（总 90% / patchgate 85% / cli 85%），不破坏跨进程确定性。
+
+## Phase B 实施记录
+
+- `QE-2026-103`：所有方案通过 `CalibrationThreshold` 暴露阈值名义值、模型不确定性
+  区间、单位、分类与文档依据；`threshold_sensitivity()` 对每个阈值执行单因素上下界
+  重算。标准分数为 analytic `0.9997237`、variational `0.8614355`、minimal
+  `0.9232608`。当前最大单阈值分数变化分别为 `0`、`0.03635`（nuclear low）、
+  `0.03035`（seed high）。analytic 的标准锚点远离其恒星寿命阈值，因此该区间内为零敏感。
+- `QE-2026-110`：新增 Hypothesis 属性测试，覆盖能量/质量单位往返、平直 FLRW 密度
+  预算守恒、引力增强使恒星寿命严格缩短、电磁增强使氢结合更强且半径更小，以及标准
+  宇宙的氢、Bohr 半径、年龄与三方案分数锚点。
+- Phase B 完整门禁：`112 passed`；Ruff lint/format、Mypy 全绿；总覆盖率 `95.61%`，
+  `patchgate.py` `100%`，`cosmogenesis/cli.py` `94.32%`。

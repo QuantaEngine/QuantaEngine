@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from quanta_engine.core.schema import UniverseConfig
 
@@ -27,6 +27,22 @@ class ConsiderDecision:
     reason: str
 
 
+@dataclass(frozen=True, slots=True)
+class CalibrationThreshold:
+    """A model threshold with an explicit calibration envelope.
+
+    The envelope is a model-uncertainty range, not a claim of experimental error.
+    ``basis`` points to the matching entry in PHYSICS_CALIBRATION.md.
+    """
+
+    nominal: float
+    calibrated_min: float
+    calibrated_max: float
+    unit: str
+    kind: str
+    basis: str
+
+
 @runtime_checkable
 class UniverseScheme(Protocol):
     """A self-contained universe-generation paradigm.
@@ -44,12 +60,15 @@ class UniverseScheme(Protocol):
 
     def optimize(self, start: ParameterVector, budget: int) -> ParameterVector: ...
 
+    def threshold_sensitivity(self, vector: ParameterVector) -> dict[str, Any]: ...
+
 
 class BaseEngine:
     """Common bookkeeping for a scheme engine (no adversarial penalties here --
     cross-scheme pressure lives entirely in ``cosmogenesis.arena``)."""
 
     name = "base"
+    calibration_thresholds: dict[str, CalibrationThreshold] = {}
 
     def __init__(self, base_config: UniverseConfig) -> None:
         self.base_config = base_config
@@ -67,6 +86,38 @@ class BaseEngine:
 
     def optimize(self, start: ParameterVector, budget: int) -> ParameterVector:  # pragma: no cover
         raise NotImplementedError
+
+    def _assess_with_thresholds(
+        self, vector: ParameterVector, overrides: dict[str, float]
+    ) -> UniverseAssessment:
+        """Evaluate with threshold overrides; calibrated engines override this hook."""
+
+        if overrides:  # pragma: no cover - protects incomplete third-party schemes
+            raise NotImplementedError(f"{self.name} does not implement threshold overrides")
+        return self.assess(vector)
+
+    def threshold_sensitivity(self, vector: ParameterVector) -> dict[str, Any]:
+        """Re-evaluate each calibrated threshold at both ends of its envelope."""
+
+        baseline = self.assess(vector).score
+        evidence: dict[str, dict[str, float | str]] = {}
+        for name, threshold in self.calibration_thresholds.items():
+            score_low = self._assess_with_thresholds(vector, {name: threshold.calibrated_min}).score
+            score_high = self._assess_with_thresholds(
+                vector, {name: threshold.calibrated_max}
+            ).score
+            evidence[name] = {
+                "nominal": threshold.nominal,
+                "calibrated_min": threshold.calibrated_min,
+                "calibrated_max": threshold.calibrated_max,
+                "unit": threshold.unit,
+                "kind": threshold.kind,
+                "basis": threshold.basis,
+                "score_low": score_low,
+                "score_high": score_high,
+                "max_abs_score_delta": max(abs(score_low - baseline), abs(score_high - baseline)),
+            }
+        return {"scheme": self.name, "baseline_score": baseline, "thresholds": evidence}
 
     def consider(
         self,

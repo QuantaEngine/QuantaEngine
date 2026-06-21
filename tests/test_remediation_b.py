@@ -1,4 +1,4 @@
-"""Phase A regression tests for remediation round B (QE-2026-101, QE-2026-102).
+"""Regression tests for remediation round B.
 
 QE-2026-101: each scheme independently reconsiders a rival's suggestion under its
 OWN objective and adopts it only if it independently verifies an improvement --
@@ -8,6 +8,8 @@ theory.yaml.
 """
 
 from __future__ import annotations
+
+import math
 
 import pytest
 
@@ -118,3 +120,22 @@ def test_compute_cost_present_in_diagnostics(cfg):
         assert "compute_cost" in out.diagnostics
         assert out.diagnostics["compute_cost"] > 0
         assert "free_parameters" in out.diagnostics
+
+
+# ---------------- QE-2026-103: calibrated physics windows ----------------
+def test_standard_universe_within_calibrated_ranges(cfg):
+    expected_scores = {
+        "analytic_compiler": (0.98, 1.0),
+        "variational_relaxer": (0.82, 0.90),
+        "minimal_axiom": (0.88, 0.96),
+    }
+    for name, (lower, upper) in expected_scores.items():
+        engine = build_scheme(name, cfg)
+        report = engine.threshold_sensitivity(ParameterVector.default())
+        assert lower <= report["baseline_score"] <= upper
+        assert report["thresholds"], f"{name} exposes no calibrated thresholds"
+        for threshold, evidence in report["thresholds"].items():
+            assert evidence["calibrated_min"] <= evidence["nominal"] <= evidence["calibrated_max"]
+            assert math.isfinite(evidence["score_low"])
+            assert math.isfinite(evidence["score_high"])
+            assert evidence["max_abs_score_delta"] >= 0.0, threshold

@@ -9,6 +9,7 @@ Adversarial I/O: ParameterVector -> UniverseAssessment.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 import numpy as np
@@ -18,6 +19,7 @@ from quanta_engine.core.units import JULIAN_YEAR_S, MEGAPARSEC_M
 
 from ...core import (
     BaseEngine,
+    CalibrationThreshold,
     ParameterVector,
     UniverseAssessment,
     apply_vector,
@@ -47,13 +49,53 @@ class _Emergent:
 
 class VariationalRelaxer(BaseEngine):
     name = SCHEME_NAME
+    calibration_thresholds = {
+        "atomic_binding_lo": CalibrationThreshold(
+            1.0, 0.5, 2.0, "eV", "heuristic", "variational.atomic_binding"
+        ),
+        "atomic_binding_hi": CalibrationThreshold(
+            120.0, 80.0, 160.0, "eV", "heuristic", "variational.atomic_binding"
+        ),
+        "relativistic_alpha": CalibrationThreshold(
+            0.5, 0.3, 0.8, "dimensionless", "model-validity", "variational.relativistic_alpha"
+        ),
+        "nuclear_strong_lo": CalibrationThreshold(
+            0.8, 0.7, 0.9, "scale", "toy calibration", "variational.nuclear_strong"
+        ),
+        "nuclear_strong_hi": CalibrationThreshold(
+            1.45, 1.25, 1.65, "scale", "toy calibration", "variational.nuclear_strong"
+        ),
+        "ignition_log10_g": CalibrationThreshold(
+            -1.4, -2.0, -0.8, "log10 scale", "heuristic", "variational.ignition"
+        ),
+        "lifetime_lo": CalibrationThreshold(
+            1.0e9, 5.0e8, 2.0e9, "yr", "heuristic", "variational.lifetime"
+        ),
+        "lifetime_hi": CalibrationThreshold(
+            1.0e13, 5.0e12, 2.0e13, "yr", "heuristic", "variational.lifetime"
+        ),
+        "structure_lo": CalibrationThreshold(
+            1.0e-6, 3.0e-7, 3.0e-6, "Q", "literature-informed", "variational.structure"
+        ),
+        "structure_hi": CalibrationThreshold(
+            3.0e-4, 1.0e-4, 1.0e-3, "Q", "literature-informed", "variational.structure"
+        ),
+        "age_lo": CalibrationThreshold(2.0e9, 1.0e9, 4.0e9, "yr", "heuristic", "variational.age"),
+        "age_hi": CalibrationThreshold(
+            5.0e10, 3.0e10, 8.0e10, "yr", "heuristic", "variational.age"
+        ),
+    }
 
     def __init__(self, base_config: UniverseConfig, seed: int = 7) -> None:
         super().__init__(base_config)
         self._rng = np.random.default_rng(seed)
         self._residual_lambda = 2.0
 
-    def _derive(self, vector: ParameterVector) -> _Emergent:
+    def _derive(
+        self, vector: ParameterVector, overrides: Mapping[str, float] | None = None
+    ) -> _Emergent:
+        thresholds = {name: item.nominal for name, item in self.calibration_thresholds.items()}
+        thresholds.update(overrides or {})
         cfg = apply_vector(self.base_config, vector)
         k = cfg.constants
         d = cfg.dimensionless
@@ -74,16 +116,29 @@ class VariationalRelaxer(BaseEngine):
         binding_eV = binding_J / 1.602176634e-19
         bohr = k.hbar / (max(mu_J, 1e-40) / k.c**2 * k.c * max(alpha, 1e-9))
 
-        atomic_margin = logistic_window(binding_eV, lo=1.0, hi=120.0)
-        relativistic = 1.0 / (1.0 + math.exp((alpha - 0.5) / 0.05))
+        atomic_margin = logistic_window(
+            binding_eV,
+            lo=thresholds["atomic_binding_lo"],
+            hi=thresholds["atomic_binding_hi"],
+        )
+        relativistic = 1.0 / (1.0 + math.exp((alpha - thresholds["relativistic_alpha"]) / 0.05))
         atomic = atomic_margin * relativistic
 
         eff_strong = strong - 0.08 * (alpha / _ALPHA0 - 1.0)
-        nuclear = logistic_window(max(eff_strong, 1e-6), lo=0.8, hi=1.45, width_frac=0.25)
+        nuclear = logistic_window(
+            max(eff_strong, 1e-6),
+            lo=thresholds["nuclear_strong_lo"],
+            hi=thresholds["nuclear_strong_hi"],
+            width_frac=0.25,
+        )
 
-        ignition = 1.0 / (1.0 + math.exp(-(math.log10(g_scale) + 1.4) / 0.4))
+        ignition = 1.0 / (
+            1.0 + math.exp(-(math.log10(g_scale) - thresholds["ignition_log10_g"]) / 0.4)
+        )
         lifetime_years = 1.0e10 * g_scale**-2.0 * (alpha / _ALPHA0) ** 0.5
-        lifetime_margin = logistic_window(lifetime_years, lo=1.0e9, hi=1.0e13)
+        lifetime_margin = logistic_window(
+            lifetime_years, lo=thresholds["lifetime_lo"], hi=thresholds["lifetime_hi"]
+        )
 
         omega_m = max(cos.omega_b + cos.omega_cdm, 1e-6)
         omega_lambda = max(cos.omega_lambda * cc, 1e-9)
@@ -96,7 +151,11 @@ class VariationalRelaxer(BaseEngine):
         amplitude = math.sqrt(max(cos.primordial_amplitude, 0.0))
         supp = 1.0 / (1.0 + omega_lambda / omega_m)
         amp_eff = amplitude * supp * 8.0
-        structure = logistic_window(max(amplitude, 1e-12), lo=1e-6, hi=3e-4)
+        structure = logistic_window(
+            max(amplitude, 1e-12),
+            lo=thresholds["structure_lo"],
+            hi=thresholds["structure_hi"],
+        )
 
         margins = {
             "atomic": atomic,
@@ -104,7 +163,7 @@ class VariationalRelaxer(BaseEngine):
             "ignition": ignition,
             "lifetime": lifetime_margin,
             "structure": structure,
-            "age": logistic_window(age_years, lo=2e9, hi=5e10),
+            "age": logistic_window(age_years, lo=thresholds["age_lo"], hi=thresholds["age_hi"]),
         }
 
         # cross-layer self-consistency residuals
@@ -157,7 +216,12 @@ class VariationalRelaxer(BaseEngine):
         )
 
     def assess(self, vector: ParameterVector) -> UniverseAssessment:
-        e = self._derive(vector)
+        return self._assess_with_thresholds(vector, {})
+
+    def _assess_with_thresholds(
+        self, vector: ParameterVector, overrides: dict[str, float]
+    ) -> UniverseAssessment:
+        e = self._derive(vector, overrides)
         residual = sum(e.residual_terms.values())
         base_margin = softmin(list(e.margins.values()))
         score = base_margin * math.exp(-self._residual_lambda * residual)

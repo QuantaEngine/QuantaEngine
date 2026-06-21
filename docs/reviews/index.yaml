@@ -97,9 +97,11 @@ reviews:
         regression: tests/test_remediation_b.py
       - id: QE-2026-103
         severity: P1
-        status: open
+        status: fixed
         category: scientific-validity
         references: [remediation-2026-06-21-s6, remediation-2026-06-21-s7.1]
+        implemented_phase: B
+        regression: tests/test_remediation_b.py::test_standard_universe_within_calibrated_ranges
       - id: QE-2026-104
         severity: P2
         status: open
@@ -132,6 +134,8 @@ reviews:
         independent: true
       - id: QE-2026-110
         severity: P3
-        status: open
+        status: fixed
         category: test-depth
         independent: true
+        implemented_phase: B
+        regression: tests/test_physics_invariants.py

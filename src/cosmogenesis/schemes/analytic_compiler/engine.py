@@ -9,7 +9,13 @@ from __future__ import annotations
 from quanta_engine.core.schema import UniverseConfig
 from quanta_engine.pipeline import run_universe_pipeline
 
-from ...core import BaseEngine, ParameterVector, UniverseAssessment, apply_vector
+from ...core import (
+    BaseEngine,
+    CalibrationThreshold,
+    ParameterVector,
+    UniverseAssessment,
+    apply_vector,
+)
 from .optimizer import coordinate_ascent
 
 SCHEME_NAME = "analytic_compiler"
@@ -17,6 +23,16 @@ SCHEME_NAME = "analytic_compiler"
 
 class AnalyticCompiler(BaseEngine):
     name = SCHEME_NAME
+    calibration_thresholds = {
+        "stellar_min_lifetime_years": CalibrationThreshold(
+            nominal=1.0e9,
+            calibrated_min=5.0e8,
+            calibrated_max=2.0e9,
+            unit="yr",
+            kind="heuristic feasibility threshold",
+            basis="analytic.stellar_min_lifetime_years",
+        )
+    }
 
     def __init__(self, base_config: UniverseConfig) -> None:
         super().__init__(base_config)
@@ -68,6 +84,16 @@ class AnalyticCompiler(BaseEngine):
             },
             warnings=warnings,
         )
+
+    def _assess_with_thresholds(
+        self, vector: ParameterVector, overrides: dict[str, float]
+    ) -> UniverseAssessment:
+        config = self.base_config.model_copy(deep=True)
+        config.stellar.min_lifetime_years_for_complexity = overrides.get(
+            "stellar_min_lifetime_years",
+            self.calibration_thresholds["stellar_min_lifetime_years"].nominal,
+        )
+        return AnalyticCompiler(config).assess(vector)
 
     @staticmethod
     def _hard_failures(report) -> float:
