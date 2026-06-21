@@ -26,7 +26,7 @@
 | Review ID | 日期 | 基线提交 | 状态 | P1 | P2 | 报告 |
 |---|---|---|---|---:|---:|---|
 | `QE-REVIEW-2026-06-21` | 2026-06-21 | `6050e48` | verified | 5 | 3 | [原评估](2026-06-21-codebase-assessment.md) / [修复复审](2026-06-21-codebase-remediation.md) |
-| `QE-REVIEW-2026-06-21B` | 2026-06-21 | `2ab9917` | open | 3 | 4 | [独立评估](2026-06-21b-codebase-assessment.md) · 修复方案包 [`codebase-remediation-2026-06-21b`](../../plans/codebase-remediation-2026-06-21b/README.md) |
+| `QE-REVIEW-2026-06-21B` | 2026-06-21 | `2ab9917` | verified | 3 | 4 | [独立评估](2026-06-21b-codebase-assessment.md) / [修复复审](2026-06-21b-codebase-remediation.md) |
 
 > `QE-REVIEW-2026-06-21B` 为**独立评估**：先基于精读独立得出问题（多数为全新发现），再与前轮交叉标注关系；聚焦对抗回路可信度、评分目标可信度与物理校准。
 

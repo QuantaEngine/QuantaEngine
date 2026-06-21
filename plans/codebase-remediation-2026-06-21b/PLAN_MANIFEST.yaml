@@ -1,10 +1,16 @@
 schema_version: 1
 plan_id: codebase-remediation-2026-06-21b
 title: QuantaEngine independent assessment remediation (round B)
-status: in-progress  # Phase A (QE-2026-101, QE-2026-102) implemented; B/C/D remaining
+status: verified
 baseline_commit: 2ab9917708b2ba1574301d48196743c4771a2282
 assessment: ../../docs/reviews/2026-06-21b-codebase-assessment.md
-remediation_report: null  # 实现并复审后补充
+remediation_report: ../../docs/reviews/2026-06-21b-codebase-remediation.md
+evidence: records/remediation-evidence.json
+implementation_commits:
+  - 7b798a70153aca3e0fe531e8ba756ec2ac7a233b
+  - d16336fdb1fc0be1b9ea1632a08c2983c78017e6
+  - e1a218807122d758b94ac606d6df7dbe1db0d70b
+  - 6772b3851f4a8d0adcc867d18fbd43b0f9758342
 
 # 本方案包只做规划，不含源码实现。每个 finding 给出拟改文件与拟加回归测试名，
 # 实现按 "先方案、后实现、再复审 verified" 流程在后续提交完成。

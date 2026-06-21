@@ -126,3 +126,10 @@
   `docs/design/REPO_STRUCTURE.md`，明确禁止继续按旧 `genesis_arena` 结构扩展。
 - Phase D 完整门禁：`119 passed`；Ruff lint/format、Mypy 全绿；总覆盖率 `95.29%`，
   `patchgate.py` `100%`，`cosmogenesis/cli.py` `94.32%`。
+
+## 最终复审
+
+独立执行器 `execution/run_remediation.py` 已完成 9 个门禁：Round-B 定向回归、覆盖率
+合约、全量 pytest、Ruff lint/format、Mypy、`pip check`、sdist/wheel build、隔离 wheel
+smoke，全部通过。机读记录为 `records/remediation-evidence.json`，逐 finding 复审为
+`docs/reviews/2026-06-21b-codebase-remediation.md`。本方案状态：`verified`。

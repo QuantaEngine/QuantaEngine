@@ -1,5 +1,11 @@
 # 交接任务：完成 remediation 方案包 B（Phase B/C/D）
 
+> **COMPLETED / 已完成（2026-06-21）：** Phase A/B/C/D 全部实现，10 项 finding
+> 均已 `verified`。复审见
+> [`docs/reviews/2026-06-21b-codebase-remediation.md`](../../docs/reviews/2026-06-21b-codebase-remediation.md)，
+> 机读门禁见 [`records/remediation-evidence.json`](records/remediation-evidence.json)。
+> 下一个维护者不应重复执行本交接清单。
+
 > 这份文档是**下一个 AI 的输入**。目标：完成
 > [`plans/codebase-remediation-2026-06-21b`](PLAN_MANIFEST.yaml) 里**尚未实现**的全部
 > finding（Phase B/C/D），并按既有归档流程收尾。Phase A（`QE-2026-101`/`QE-2026-102`）

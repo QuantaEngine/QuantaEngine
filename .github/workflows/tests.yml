@@ -20,9 +20,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[dev]
       - name: Lint
-        run: python -m ruff check src tests examples plans/quantaengine-mvp-v1/execution plans/codebase-remediation-2026-06-21/execution
+        run: python -m ruff check src tests examples plans/quantaengine-mvp-v1/execution plans/codebase-remediation-2026-06-21/execution plans/codebase-remediation-2026-06-21b/execution
       - name: Format
-        run: python -m ruff format --check src tests examples plans/quantaengine-mvp-v1/execution plans/codebase-remediation-2026-06-21/execution
+        run: python -m ruff format --check src tests examples plans/quantaengine-mvp-v1/execution plans/codebase-remediation-2026-06-21/execution plans/codebase-remediation-2026-06-21b/execution
       - name: Type check
         run: python -m mypy src
       - name: Coverage contracts

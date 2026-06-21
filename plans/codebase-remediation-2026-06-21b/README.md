@@ -5,7 +5,7 @@
 
 | 字段 | 值 |
 |---|---|
-| 状态 | `implemented`（Phase A/B/C/D 均已实现；待最终复审 verified） |
+| 状态 | `verified`（Phase A/B/C/D 均实现并通过独立复审） |
 | 基线提交 | `2ab9917708b2ba1574301d48196743c4771a2282` |
 | 评估报告 | [2026-06-21b-codebase-assessment.md](../../docs/reviews/2026-06-21b-codebase-assessment.md) |
 | Findings | P1×3、P2×4、P3×3 |
@@ -17,6 +17,10 @@
 - [`EXECUTION_REPORT.md`](EXECUTION_REPORT.md) — 设计说明，重点是 `QE-2026-101`「独立考虑建议」回路。
 - [`TRACEABILITY_MATRIX.md`](TRACEABILITY_MATRIX.md) — finding → 拟改代码 → 拟加测试 → 验收。
 - [`ITERATION_GUIDE.md`](ITERATION_GUIDE.md) — 实现/复审流程。
+- [`records/remediation-evidence.json`](records/remediation-evidence.json) — 119 tests、覆盖率、
+  lint/format/types、依赖、build 与隔离 wheel smoke 的机读证据。
+- [`2026-06-21b-codebase-remediation.md`](../../docs/reviews/2026-06-21b-codebase-remediation.md)
+  — 10 项 finding 的逐项独立复审。
 
 ## 核心设计原则（用户确认的意图）
 

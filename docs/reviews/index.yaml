@@ -66,9 +66,19 @@ reviews:
     date: 2026-06-21
     baseline_commit: 2ab9917708b2ba1574301d48196743c4771a2282
     report: 2026-06-21b-codebase-assessment.md
-    status: open
+    status: verified
     independent: true
     remediation_plan: ../../plans/codebase-remediation-2026-06-21b/README.md
+    remediation_report: 2026-06-21b-codebase-remediation.md
+    implementation_commits:
+      - 7b798a70153aca3e0fe531e8ba756ec2ac7a233b
+      - d16336fdb1fc0be1b9ea1632a08c2983c78017e6
+      - e1a218807122d758b94ac606d6df7dbe1db0d70b
+      - 6772b3851f4a8d0adcc867d18fbd43b0f9758342
+    verified_at: 2026-06-21
+    resolution:
+      verified: 10
+      open: 0
     baseline_gates:
       pytest: 97 passed
       coverage_total: 95.41
@@ -83,70 +93,80 @@ reviews:
     findings:
       - id: QE-2026-101
         severity: P1
-        status: fixed
+        status: verified
+        fixed_in: 7b798a70153aca3e0fe531e8ba756ec2ac7a233b
         category: adversarial-core
         independent: true
         implemented_phase: A
         regression: tests/test_remediation_b.py
       - id: QE-2026-102
         severity: P1
-        status: fixed
+        status: verified
+        fixed_in: 7b798a70153aca3e0fe531e8ba756ec2ac7a233b
         category: scoring-integrity
         independent: true
         implemented_phase: A
         regression: tests/test_remediation_b.py
       - id: QE-2026-103
         severity: P1
-        status: fixed
+        status: verified
+        fixed_in: d16336fdb1fc0be1b9ea1632a08c2983c78017e6
         category: scientific-validity
         references: [remediation-2026-06-21-s6, remediation-2026-06-21-s7.1]
         implemented_phase: B
         regression: tests/test_remediation_b.py::test_standard_universe_within_calibrated_ranges
       - id: QE-2026-104
         severity: P2
-        status: fixed
+        status: verified
+        fixed_in: e1a218807122d758b94ac606d6df7dbe1db0d70b
         category: performance
         independent: true
         implemented_phase: C
         regression: tests/test_remediation_b.py::test_assess_memoized_and_deterministic
       - id: QE-2026-105
         severity: P2
-        status: fixed
+        status: verified
+        fixed_in: e1a218807122d758b94ac606d6df7dbe1db0d70b
         category: scaling
         independent: true
         implemented_phase: C
         regression: tests/test_remediation_b.py::test_novelty_archive_bounded_no_collapse
       - id: QE-2026-106
         severity: P2
-        status: fixed
+        status: verified
+        fixed_in: e1a218807122d758b94ac606d6df7dbe1db0d70b
         category: extensibility
         references: [remediation-2026-06-21-s7.2]
         implemented_phase: C
         regression: tests/test_remediation_b.py::test_new_scheme_discovered_without_central_edit
       - id: QE-2026-107
         severity: P2
-        status: fixed
+        status: verified
+        fixed_in: 6772b3851f4a8d0adcc867d18fbd43b0f9758342
         category: maintenance
         references: [remediation-2026-06-21-s6, remediation-2026-06-21-s7.3]
         implemented_phase: D
         regression: tests/test_remediation_b.py::test_deprecation_schedule_documented
       - id: QE-2026-108
         severity: P3
-        status: fixed
+        status: verified
+        fixed_in: e1a218807122d758b94ac606d6df7dbe1db0d70b
         category: loop-control
         independent: true
         implemented_phase: C
         regression: tests/test_remediation_b.py::test_evolution_early_stops_on_stable_ecosystem
       - id: QE-2026-109
         severity: P3
-        status: fixed
+        status: verified
+        fixed_in: 6772b3851f4a8d0adcc867d18fbd43b0f9758342
         category: docs-drift
         independent: true
         implemented_phase: D
         regression: documentation superseded-banner inspection
       - id: QE-2026-110
         severity: P3
-        status: fixed
+        status: verified
+        fixed_in: d16336fdb1fc0be1b9ea1632a08c2983c78017e6
         category: test-depth
         independent: true
         implemented_phase: B
