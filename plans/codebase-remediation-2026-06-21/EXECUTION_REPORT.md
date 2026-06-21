@@ -32,6 +32,8 @@
 ### 4. 工程门禁
 
 - 新增针对 8 个 finding 的回归文件 `tests/test_remediation.py`。
+- 覆盖率门禁要求 `cosmogenesis` 总体至少 90%、PatchGate 与 CLI 各至少 85%；
+  当前实测分别为 95%、100% 和 94%。
 - CI 在 Python 3.11-3.13 执行 Ruff、format、Mypy、wheel build 和安装 smoke。
 - pytest/hypothesis 移至 dev extra，README、CHANGELOG 和可执行计划命令同步更新。
 

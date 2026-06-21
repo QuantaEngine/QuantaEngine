@@ -81,6 +81,35 @@ def test_concurrent_forks_allocate_unique_ids() -> None:
     assert len(registry.all()) == len(roots) * 2
 
 
+def test_patchgate_patch_invalidation_history_and_reseed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    registry = TheoryRegistry.from_dir(THEORIES)
+    theory = registry.get("T-0001")
+    gate = PatchGate(registry, history_dir=tmp_path / "history", run_seed=23)
+    challenge, result = _fork_decision(theory.theory_id, "CH-patch")
+    patch_result = result.model_copy(
+        update={"decision": JudgeDecision.PATCH_REQUIRED, "patch_required": True}
+    )
+    expected_seed = ParameterVector.default()
+    monkeypatch.setattr(gate, "_robust_reseed", lambda _theory: expected_seed)
+    patched, events = gate.process(theory, [(challenge, patch_result)])
+    assert patched.version == "0.1.1"
+    assert patched.seed_vector == expected_seed.values
+    assert events[0].outcome == PatchOutcome.PATCHED
+
+    invalid_result = result.model_copy(update={"decision": JudgeDecision.THEORY_INVALIDATED})
+    _, invalid_events = gate.process(patched, [(challenge, invalid_result)])
+    assert invalid_events[0].outcome == PatchOutcome.INVALIDATED
+    history = tmp_path / "history" / "T-0001.history.jsonl"
+    assert len(history.read_text(encoding="utf-8").splitlines()) == 2
+
+    # Exercise the real local search separately so the patch test remains fast and explicit.
+    monkeypatch.undo()
+    reseeded = PatchGate(registry, run_seed=23)._robust_reseed(theory, samples=2)
+    assert isinstance(reseeded, ParameterVector)
+
+
 def test_parallel_and_serial_tournaments_are_identical() -> None:
     source = TheoryRegistry.from_dir(THEORIES)
     serial_registry = TheoryRegistry.from_theories(source.all(), policy=source.policy)
@@ -188,6 +217,19 @@ def test_cli_workspace_and_version_from_arbitrary_cwd(
     )
     assert result.exit_code == 0
     assert "T-0001" in result.stdout
+    for command, expected in (
+        (["theory-show", "T-0001"], "conservative_eft"),
+        (["score", "--seed", "9"], "T-0001"),
+        (["tournament", "--seed", "9"], "Pareto front"),
+        (["evolve", "--generations", "0", "--no-record", "--seed", "9"], "Final theories"),
+    ):
+        smoke = runner.invoke(
+            app,
+            ["--workspace", str(ROOT), *command],
+            catch_exceptions=False,
+        )
+        assert smoke.exit_code == 0
+        assert expected in smoke.stdout
     duel = runner.invoke(
         app,
         [

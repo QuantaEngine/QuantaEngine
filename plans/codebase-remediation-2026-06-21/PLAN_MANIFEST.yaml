@@ -37,6 +37,8 @@ tooling:
     command: ["{python}", "-m", "pytest", "tests/test_remediation.py", "-q"]
   - id: full-tests
     command: ["{python}", "-m", "pytest"]
+  - id: coverage-contracts
+    command: ["{python}", "plans/codebase-remediation-2026-06-21/execution/check_coverage.py"]
   - id: lint
     command: ["{python}", "-m", "ruff", "check", "src", "tests", "examples", "plans/quantaengine-mvp-v1/execution", "plans/codebase-remediation-2026-06-21/execution"]
   - id: format
@@ -50,6 +52,7 @@ tooling:
 
 artifacts:
   - docs/reviews/2026-06-21-codebase-remediation.md
+  - plans/codebase-remediation-2026-06-21/execution/check_coverage.py
   - plans/codebase-remediation-2026-06-21/EXECUTION_REPORT.md
   - plans/codebase-remediation-2026-06-21/TRACEABILITY_MATRIX.md
   - plans/codebase-remediation-2026-06-21/records/remediation-evidence.json

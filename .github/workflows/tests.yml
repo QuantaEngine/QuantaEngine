@@ -25,6 +25,8 @@ jobs:
         run: python -m ruff format --check src tests examples plans/quantaengine-mvp-v1/execution plans/codebase-remediation-2026-06-21/execution
       - name: Type check
         run: python -m mypy src
+      - name: Coverage contracts
+        run: python plans/codebase-remediation-2026-06-21/execution/check_coverage.py
       - name: Build wheel
         run: python -m build
       - name: Installed wheel smoke test

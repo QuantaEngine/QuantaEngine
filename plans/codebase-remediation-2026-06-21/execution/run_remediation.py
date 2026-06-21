@@ -110,6 +110,10 @@ def main() -> int:
     ]
     commands = [
         ("targeted-regressions", [python, "-m", "pytest", "tests/test_remediation.py", "-q"]),
+        (
+            "coverage-contracts",
+            [python, "plans/codebase-remediation-2026-06-21/execution/check_coverage.py"],
+        ),
         ("full-tests", [python, "-m", "pytest"]),
         ("lint", [python, "-m", "ruff", "check", *scopes]),
         ("format", [python, "-m", "ruff", "format", "--check", *scopes]),

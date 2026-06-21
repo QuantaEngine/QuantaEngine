@@ -13,6 +13,7 @@
 - [TRACEABILITY_MATRIX.md](TRACEABILITY_MATRIX.md)：finding 到代码、测试和证据的映射。
 - [ITERATION_GUIDE.md](ITERATION_GUIDE.md)：后续优化同一方案或分叉试验的流程。
 - [execution/run_remediation.py](execution/run_remediation.py)：一键复审执行器。
+- [execution/check_coverage.py](execution/check_coverage.py)：关键模块覆盖率门禁。
 - [records/remediation-evidence.json](records/remediation-evidence.json)：最近一次结构化证据。
 
 ## 执行
