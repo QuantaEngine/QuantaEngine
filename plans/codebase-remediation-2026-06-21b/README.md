@@ -5,10 +5,11 @@
 
 | 字段 | 值 |
 |---|---|
-| 状态 | `planned`（仅规划，**本轮不含源码实现**） |
+| 状态 | `in-progress`（Phase A 已实现 commit `7b798a7`；B/C/D 待办） |
 | 基线提交 | `2ab9917708b2ba1574301d48196743c4771a2282` |
 | 评估报告 | [2026-06-21b-codebase-assessment.md](../../docs/reviews/2026-06-21b-codebase-assessment.md) |
 | Findings | P1×3、P2×4、P3×3 |
+| **接手入口** | **[HANDOVER.md](HANDOVER.md)** — 下一个 AI 完成 B/C/D 的输入文档 |
 
 ## 文件
 
