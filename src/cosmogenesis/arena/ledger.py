@@ -51,6 +51,7 @@ def append_history(
     persist_spec: bool = False,
     run_id: str = "manual",
     run_seed: int = 0,
+    considerations: list | None = None,
 ) -> Path | None:
     """Append one generation record to a lineage's history.jsonl.
 
@@ -110,6 +111,16 @@ def append_history(
                 "child_theory_id": e.child_theory_id,
             }
             for e in events
+        ],
+        # QE-2026-101: traceable "suggestion -> independent reconsideration -> adopt/reject".
+        "considerations": [
+            {
+                "source_theory_id": c.source_theory_id,
+                "adopted": c.adopted,
+                "delta": round(c.delta, 6),
+                "reason": c.reason,
+            }
+            for c in (considerations or [])
         ],
     }
     with path.open("a", encoding="utf-8") as fh:

@@ -60,6 +60,11 @@ class AnalyticCompiler(BaseEngine):
                 "structure": report.structure_report.structure_growth_possible,
                 "planets": report.structure_report.planet_formation_possible,
                 "hard_window_failures": self._hard_failures(report),
+                # engine-derived cost/complexity (QE-2026-102): the full multi-layer
+                # forward pipeline is the heaviest of the three paradigms, and varies
+                # all five shared parameters.
+                "free_parameters": 5,
+                "compute_cost": 60,
             },
             warnings=warnings,
         )

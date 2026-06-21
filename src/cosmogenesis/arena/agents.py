@@ -95,6 +95,8 @@ class TheoryAgent:
                 probe_vector=list(ParameterVector.from_normalized(probe).values),
                 expected_failure_mode="score drops sharply (fragile)",
                 suggested_resolution="patch",
+                # constructive advice: consider the attacker's own (robust) champion.
+                suggestion=list(bridge.seed_vector(self.theory).values),
             )
         ]
 
@@ -132,6 +134,8 @@ class TheoryAgent:
                 ],
                 expected_failure_mode="low generative power",
                 suggested_resolution="fork",
+                # constructive advice: consider the attacker's own champion region.
+                suggestion=list(bridge.seed_vector(self.theory).values),
             )
         ]
 

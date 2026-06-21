@@ -1,7 +1,7 @@
 schema_version: 1
 plan_id: codebase-remediation-2026-06-21b
 title: QuantaEngine independent assessment remediation (round B)
-status: planned
+status: in-progress  # Phase A (QE-2026-101, QE-2026-102) implemented; B/C/D remaining
 baseline_commit: 2ab9917708b2ba1574301d48196743c4771a2282
 assessment: ../../docs/reviews/2026-06-21b-codebase-assessment.md
 remediation_report: null  # 实现并复审后补充

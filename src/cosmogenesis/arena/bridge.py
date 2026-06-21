@@ -40,6 +40,15 @@ def optimize(theory: TheorySpec, vector: ParameterVector, budget: int = 70) -> P
     return build_engine(theory).optimize(vector, budget=budget)
 
 
+def consider(theory: TheorySpec, suggestion: ParameterVector, budget: int = 20):
+    """The theory independently reconsiders a rival's ``suggestion`` under its own
+    objective, starting from its current champion. Deterministic (fresh engine)."""
+
+    engine = build_engine(theory)
+    current = seed_vector(theory)
+    return engine.consider(current, suggestion, budget=budget)
+
+
 def novelty_features(theory: TheorySpec, vector: ParameterVector) -> list[float]:
     """Scheme-agnostic feature vector for novelty search (same axes per engine)."""
 

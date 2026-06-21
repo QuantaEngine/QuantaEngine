@@ -42,6 +42,7 @@ class _Emergent:
     margins: dict[str, float]
     residual_terms: dict[str, float]
     relax_converged: bool
+    iterations: int
 
 
 class VariationalRelaxer(BaseEngine):
@@ -119,7 +120,9 @@ class VariationalRelaxer(BaseEngine):
         z, s, lf = 0.1, max(amp_eff, 1e-6), lifetime_margin
         converged = False
         last = math.inf
+        iterations = 0
         for _ in range(64):
+            iterations += 1
             z_new = 0.6 * ignition * nuclear * s
             s_new = structure * omega_m * (1.0 + 0.2 * z)
             l_new = lifetime_margin
@@ -150,6 +153,7 @@ class VariationalRelaxer(BaseEngine):
             margins=margins,
             residual_terms=residual_terms,
             relax_converged=converged,
+            iterations=iterations,
         )
 
     def assess(self, vector: ParameterVector) -> UniverseAssessment:
@@ -178,6 +182,10 @@ class VariationalRelaxer(BaseEngine):
                 "amplitude": e.amplitude,
                 "residual_terms": e.residual_terms,
                 "relax_converged": e.relax_converged,
+                # cost measured from the actual fixed-point relaxation (QE-2026-102):
+                # data-dependent iteration count plus the window/residual evaluations.
+                "free_parameters": 5,
+                "compute_cost": 10 + e.iterations,
             },
             warnings=warnings,
         )

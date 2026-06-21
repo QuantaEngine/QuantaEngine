@@ -6,10 +6,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 from pydantic import BaseModel, Field
 
-from ..core import stable_seed
+from ..core import ParameterVector, stable_seed
 from . import bridge
 from .agents import TheoryAgent
-from .cards import ChallengeCard, DefenseCard, JudgeResult, PatchEvent
+from .cards import ChallengeCard, ConsiderationCard, DefenseCard, JudgeResult, PatchEvent
 from .judge import Judge
 from .patchgate import PatchGate
 from .registry import TheoryRegistry
@@ -27,6 +27,7 @@ class DuelRound(BaseModel):
     defenses: list[DefenseCard] = Field(default_factory=list)
     judge_results: list[JudgeResult] = Field(default_factory=list)
     patch_events: list[PatchEvent] = Field(default_factory=list)
+    considerations: list[ConsiderationCard] = Field(default_factory=list)
 
 
 class DuelReport(BaseModel):
@@ -44,7 +45,14 @@ def _one_direction(
     judge: Judge,
     gate: PatchGate,
     run_seed: int,
-) -> tuple[TheorySpec, list[ChallengeCard], list[DefenseCard], list[JudgeResult], list[PatchEvent]]:
+) -> tuple[
+    TheorySpec,
+    list[ChallengeCard],
+    list[DefenseCard],
+    list[JudgeResult],
+    list[PatchEvent],
+    list[ConsiderationCard],
+]:
     challenges = TheoryAgent(attacker, run_seed=run_seed).attack(defender)
     defenses = TheoryAgent(defender, run_seed=run_seed).defend(challenges)
     defense_by_ch = {d.challenge_id: d for d in defenses}
@@ -56,7 +64,33 @@ def _one_direction(
         judge_results.append(jr)
         decisions.append((ch, jr))
     updated, events = gate.process(defender, decisions)
-    return updated, challenges, defenses, judge_results, events
+
+    # QE-2026-101: the defender independently reconsiders each constructive
+    # suggestion under its OWN objective and adopts only a self-verified improvement.
+    # This only ever moves the defender's own lineage champion -- never a merge.
+    considerations: list[ConsiderationCard] = []
+    cur = updated
+    for ch in challenges:
+        if ch.suggestion is None:
+            continue
+        suggestion = ParameterVector(list(ch.suggestion))
+        decision = bridge.consider(cur, suggestion)
+        considerations.append(
+            ConsiderationCard(
+                challenge_id=ch.challenge_id,
+                target_theory_id=cur.theory_id,
+                source_theory_id=ch.source_theory_id,
+                adopted=decision.adopt,
+                own_score_before=decision.own_before,
+                own_score_after=decision.own_after,
+                delta=decision.own_after - decision.own_before,
+                reason=decision.reason,
+            )
+        )
+        if decision.adopt:
+            cur = cur.model_copy(update={"seed_vector": list(decision.champion.values)})
+            gate.registry.add(cur)
+    return cur, challenges, defenses, judge_results, events, considerations
 
 
 def run_duel(
@@ -85,10 +119,10 @@ def run_duel(
         # B attacks A, then A attacks B (sequential so patches land deterministically)
         seed_ba = stable_seed(run_seed, theory_a.theory_id, theory_b.theory_id, r, "b-attacks-a")
         seed_ab = stable_seed(run_seed, theory_a.theory_id, theory_b.theory_id, r, "a-attacks-b")
-        cur_a, ch_ba, df_a, jr_ba, ev_a = _one_direction(
+        cur_a, ch_ba, df_a, jr_ba, ev_a, co_a = _one_direction(
             cur_b, cur_a, verifier, judge, gate, seed_ba
         )
-        cur_b, ch_ab, df_b, jr_ab, ev_b = _one_direction(
+        cur_b, ch_ab, df_b, jr_ab, ev_b, co_b = _one_direction(
             cur_a, cur_b, verifier, judge, gate, seed_ab
         )
 
@@ -103,6 +137,7 @@ def run_duel(
                 defenses=df_a + df_b,
                 judge_results=jr_ba + jr_ab,
                 patch_events=ev_a + ev_b,
+                considerations=co_a + co_b,
             )
         )
 

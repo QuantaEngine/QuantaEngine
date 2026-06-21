@@ -14,7 +14,7 @@ from .parameters import (
     apply_vector,
     vector_from_config,
 )
-from .protocol import BaseEngine, UniverseScheme, fragility_profile
+from .protocol import BaseEngine, ConsiderDecision, UniverseScheme, fragility_profile
 from .reproducibility import (
     code_revision,
     file_sha256,
@@ -37,6 +37,7 @@ __all__ = [
     "logistic_window",
     "UniverseScheme",
     "BaseEngine",
+    "ConsiderDecision",
     "fragility_profile",
     "stable_digest",
     "stable_seed",

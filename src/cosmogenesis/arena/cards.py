@@ -62,6 +62,10 @@ class ChallengeCard(BaseModel):
     probe_vector: list[float] | None = None
     expected_failure_mode: str | None = None
     suggested_resolution: str | None = None  # "patch" | "fork" | "annotate"
+    # A constructive suggestion: a concrete parameter vector the source proposes the
+    # target *consider*. The target re-evaluates it under its OWN objective and adopts
+    # only if it independently verifies an improvement (QE-2026-101). Never merged.
+    suggestion: list[float] | None = None
 
 
 class DefenseStance(StrEnum):
@@ -110,6 +114,25 @@ class JudgeResult(BaseModel):
     rationale: str
     patch_required: bool = False
     fork_recommended: bool = False
+
+
+class ConsiderationCard(BaseModel):
+    """An independent verdict by the target on a rival's suggestion (QE-2026-101).
+
+    The target evaluated the suggestion under its OWN objective and decided whether
+    to adopt it. ``merged`` is always False: schemes are never merged; only the
+    target's own lineage champion may change.
+    """
+
+    challenge_id: str
+    target_theory_id: str  # the recipient who independently reconsiders
+    source_theory_id: str  # who offered the suggestion
+    adopted: bool
+    own_score_before: float
+    own_score_after: float
+    delta: float
+    reason: str
+    merged: bool = False
 
 
 class PatchOutcome(StrEnum):

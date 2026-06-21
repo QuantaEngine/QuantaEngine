@@ -83,14 +83,18 @@ reviews:
     findings:
       - id: QE-2026-101
         severity: P1
-        status: open
+        status: fixed
         category: adversarial-core
         independent: true
+        implemented_phase: A
+        regression: tests/test_remediation_b.py
       - id: QE-2026-102
         severity: P1
-        status: open
+        status: fixed
         category: scoring-integrity
         independent: true
+        implemented_phase: A
+        regression: tests/test_remediation_b.py
       - id: QE-2026-103
         severity: P1
         status: open

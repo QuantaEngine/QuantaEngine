@@ -86,11 +86,22 @@ def _robustness(theory: TheorySpec) -> float:
 
 
 def _simplicity(theory: TheorySpec) -> float:
-    """Fewer free parameters / axioms -> simpler. Minimal-axiom engines win here."""
+    """Fewer free parameters / axioms -> simpler. Engine-derived (QE-2026-102): each
+    engine reports its real structural free-parameter count, not a YAML self-report."""
 
     out = bridge.assess(theory, bridge.seed_vector(theory))
     free = float(out.diagnostics.get("free_parameters", len(bridge.seed_vector(theory).values)))
     return 1.0 / (1.0 + math.log1p(free))
+
+
+def _efficiency(theory: TheorySpec) -> float:
+    """Computational efficiency derived from the engine's actual compute cost
+    (QE-2026-102), not from the gameable ``theory.philosophy.computational_efficiency``
+    self-report. Cheaper paradigms (closed-form) score higher."""
+
+    out = bridge.assess(theory, bridge.seed_vector(theory))
+    cost = float(out.diagnostics.get("compute_cost", 1.0))
+    return 1.0 / (1.0 + math.log1p(max(cost, 0.0)))
 
 
 def score_theory(
@@ -114,7 +125,7 @@ def score_theory(
         robustness=_robustness(theory),
         novelty=0.0,  # filled in against the archive by update_novelty
         simplicity=_simplicity(theory),
-        computational_efficiency=theory.philosophy.computational_efficiency,
+        computational_efficiency=_efficiency(theory),
         unresolved_challenge_penalty=(
             1.0 if invalidated else float(np.clip(unresolved_penalty, 0.0, 1.0))
         ),

@@ -83,6 +83,8 @@ class MinimalAxiom(BaseEngine):
                 "N_star": n_star,
                 "hierarchy_ratio": hierarchy,
                 "free_parameters": 3,  # alpha, alpha_G, beta -- the minimal set
+                # closed-form anthropic inequalities: the cheapest paradigm (QE-2026-102).
+                "compute_cost": len(margins),
             },
             warnings=warnings,
         )

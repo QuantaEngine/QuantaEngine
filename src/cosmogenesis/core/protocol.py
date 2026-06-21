@@ -2,12 +2,29 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
 from quanta_engine.core.schema import UniverseConfig
 
 from .assessment import UniverseAssessment
 from .parameters import AXES, ParameterVector
+
+
+@dataclass(slots=True)
+class ConsiderDecision:
+    """Outcome of a scheme independently reconsidering a rival's suggestion.
+
+    ``champion`` is the parameter vector the recipient keeps afterwards -- either an
+    improved point (when adopted) or its own unchanged current (when rejected).
+    Schemes are never merged: this only ever updates one recipient's own lineage.
+    """
+
+    adopt: bool
+    champion: ParameterVector
+    own_before: float
+    own_after: float
+    reason: str
 
 
 @runtime_checkable
@@ -50,6 +67,38 @@ class BaseEngine:
 
     def optimize(self, start: ParameterVector, budget: int) -> ParameterVector:  # pragma: no cover
         raise NotImplementedError
+
+    def consider(
+        self,
+        current: ParameterVector,
+        suggestion: ParameterVector,
+        budget: int = 20,
+        eps: float = 1e-9,
+    ) -> ConsiderDecision:
+        """Independently reconsider a rival's ``suggestion`` under our OWN objective.
+
+        We are not a blind follower: we evaluate the suggested point, and also try a
+        short optimization warm-started from it within our own model. We adopt the
+        result only if it *strictly* beats our current champion under our own
+        objective; otherwise we keep our own champion unchanged. Schemes are never
+        merged -- only this recipient's own lineage may move.
+        """
+
+        own_before = self.objective(current)
+        candidate = suggestion
+        own_after = self.objective(suggestion)
+        if budget > 0:
+            warm = self.optimize(suggestion, budget)
+            warm_score = self.objective(warm)
+            if warm_score > own_after:
+                candidate, own_after = warm, warm_score
+        if own_after > own_before + eps:
+            return ConsiderDecision(
+                True, candidate, own_before, own_after, "self-verified improvement"
+            )
+        return ConsiderDecision(
+            False, current, own_before, own_after, "no self-verified improvement; kept own champion"
+        )
 
 
 def fragility_profile(

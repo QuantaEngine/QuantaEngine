@@ -182,10 +182,13 @@ def evolve(
         # 3b. durable per-lineage history (git-tracked) when requested.
         if lineage_root is not None:
             events_by_theory: dict[str, list] = {}
+            considerations_by_theory: dict[str, list] = {}
             for duel in tour.duels:
                 for rd in duel.rounds:
                     for ev in rd.patch_events:
                         events_by_theory.setdefault(ev.theory_id, []).append(ev)
+                    for co in rd.considerations:
+                        considerations_by_theory.setdefault(co.target_theory_id, []).append(co)
             for s in tour.scores:
                 append_history(
                     registry.get(s.theory_id),
@@ -196,6 +199,7 @@ def evolve(
                     persist_spec=persist_forks,
                     run_id=run_id,
                     run_seed=run_seed,
+                    considerations=considerations_by_theory.get(s.theory_id, []),
                 )
 
         # 4. anti-collapse selection of next generation.
