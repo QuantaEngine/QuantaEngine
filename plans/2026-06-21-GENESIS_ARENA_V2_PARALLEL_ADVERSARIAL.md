@@ -1,5 +1,9 @@
 # GenesisArena v2 — 并行多理论对抗式创世平台（改进版实现方案）
 
+> **SUPERSEDED / 已取代：** 本文保留为历史实现记录。当前目录、扩展与分层规范以
+> [`docs/design/REPO_STRUCTURE.md`](../docs/design/REPO_STRUCTURE.md) 为唯一权威来源；
+> 不应按本文旧的 `genesis_arena` 结构新增代码。
+
 文件名：`2026-06-21-GENESIS_ARENA_V2_PARALLEL_ADVERSARIAL.md`
 版本：v2.0（取代并吸收 `2026-06-21-ADVERSARIAL_SELF_PLAY_IMPLEMENTATION.md` v1.1）
 适用项目：QuantaEngine

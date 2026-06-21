@@ -5,7 +5,7 @@
 
 | 字段 | 值 |
 |---|---|
-| 状态 | `in-progress`（Phase A/B/C 已实现；D 待办） |
+| 状态 | `implemented`（Phase A/B/C/D 均已实现；待最终复审 verified） |
 | 基线提交 | `2ab9917708b2ba1574301d48196743c4771a2282` |
 | 评估报告 | [2026-06-21b-codebase-assessment.md](../../docs/reviews/2026-06-21b-codebase-assessment.md) |
 | Findings | P1×3、P2×4、P3×3 |
@@ -40,6 +40,9 @@
 - Phase C：`QE-2026-104/105/106/108`。assess 缓存按 theory/version/rounded-vector
   隔离；novelty 归档有容量、按代衰减并去重；scheme 子包/entry point 自动发现；
   PatchGate 使用可注入冲突策略；evolve 报告收敛指标并支持显式早停，默认行为不变。
+- Phase D：`QE-2026-107/109`。`quantaengine_lattice` 定位为冻结历史原型，旧
+  `quantaengine` namespace 明确在 1.0（不早于 2027-06-21）移除并给出迁移路径；
+  旧 GenesisArena v2 计划已标记由 `REPO_STRUCTURE.md` 取代。
 
 ## 实现后流程
 

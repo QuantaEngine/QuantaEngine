@@ -10,6 +10,7 @@ theory.yaml.
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pytest
 
@@ -279,3 +280,15 @@ def test_evolution_early_stopping_is_opt_in(registry):
     )
     assert report.completed_generations == 3
     assert report.stopped_early is False
+
+
+# ---------------- QE-2026-107: explicit legacy retirement schedule ----------------
+def test_deprecation_schedule_documented():
+    path = Path("docs/design/DEPRECATION.md")
+    assert path.exists()
+    text = path.read_text(encoding="utf-8").lower()
+    assert "quantaengine_lattice" in text
+    assert "frozen" in text
+    assert "quantaengine" in text
+    assert "1.0" in text and "remove" in text
+    assert "migration" in text

@@ -154,9 +154,10 @@ docs/design/REPO_STRUCTURE.md  the authoritative directory convention
 plans/                         versioned, executable plan packages
 ```
 
-The legacy `quantaengine_lattice` scalar-field lattice API (formerly `quantaengine`)
-remains available for compatibility but is independent of the effective-physics and
-adversarial stacks. New work should use `quanta_engine` and `cosmogenesis`.
+The legacy `quantaengine_lattice` scalar-field lattice API is frozen; the former
+`quantaengine` namespace is deprecated and scheduled for removal in 1.0. New work should use
+`quanta_engine` and `cosmogenesis`; see
+[docs/design/DEPRECATION.md](docs/design/DEPRECATION.md) for migration and dates.
 
 ## Scientific Boundaries
 

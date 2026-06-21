@@ -116,3 +116,13 @@
   `early_stopping=False` 的默认路径仍完成全部请求代数。
 - Phase C 完整门禁：`118 passed`；Ruff lint/format、Mypy 全绿；总覆盖率 `95.29%`，
   `patchgate.py` `100%`，`cosmogenesis/cli.py` `94.32%`。
+
+## Phase D 实施记录
+
+- `QE-2026-107`：新增 `docs/design/DEPRECATION.md`，将 `quantaengine_lattice` 定位为
+  冻结历史原型（仅正确性/安全/打包维护），将 `quantaengine` 明确为兼容 shim；后者在
+  1.0.0 且不早于 2027-06-21 移除。文档含 Python/CLI 迁移和支持边界。
+- `QE-2026-109`：历史 GenesisArena v2 计划顶部增加中英双语 `SUPERSEDED` 横幅，指向
+  `docs/design/REPO_STRUCTURE.md`，明确禁止继续按旧 `genesis_arena` 结构扩展。
+- Phase D 完整门禁：`119 passed`；Ruff lint/format、Mypy 全绿；总覆盖率 `95.29%`，
+  `patchgate.py` `100%`，`cosmogenesis/cli.py` `94.32%`。

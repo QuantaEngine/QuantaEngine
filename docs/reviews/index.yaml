@@ -125,9 +125,11 @@ reviews:
         regression: tests/test_remediation_b.py::test_new_scheme_discovered_without_central_edit
       - id: QE-2026-107
         severity: P2
-        status: open
+        status: fixed
         category: maintenance
         references: [remediation-2026-06-21-s6, remediation-2026-06-21-s7.3]
+        implemented_phase: D
+        regression: tests/test_remediation_b.py::test_deprecation_schedule_documented
       - id: QE-2026-108
         severity: P3
         status: fixed
@@ -137,9 +139,11 @@ reviews:
         regression: tests/test_remediation_b.py::test_evolution_early_stops_on_stable_ecosystem
       - id: QE-2026-109
         severity: P3
-        status: open
+        status: fixed
         category: docs-drift
         independent: true
+        implemented_phase: D
+        regression: documentation superseded-banner inspection
       - id: QE-2026-110
         severity: P3
         status: fixed
