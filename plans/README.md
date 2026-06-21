@@ -7,6 +7,7 @@
 | 方案 | 状态 | 入口 | 适用范围 |
 |---|---|---|---|
 | QuantaEngine MVP v1 | 已实现并验收 | [quantaengine-mvp-v1/README.md](quantaengine-mvp-v1/README.md) | 从有效物理参数生成粒子、原子、核、宇宙学、恒星、结构与复杂性报告 |
+| 2026-06-21 代码库修复 | 已验证 | [codebase-remediation-2026-06-21/README.md](codebase-remediation-2026-06-21/README.md) | 评估 finding 修复、回归、覆盖率、wheel 与双远端发布证据 |
 
 原始完整方案保存在 [2026-06-20-QuantaEngine_PROJECT_PLAN.md](2026-06-20-QuantaEngine_PROJECT_PLAN.md)，作为需求来源和历史基线，不随实现细节重写。
 

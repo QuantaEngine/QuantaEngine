@@ -4,7 +4,18 @@ reviews:
     date: 2026-06-21
     baseline_commit: 6050e48e095fc87770c7b1e02fc1883f675fe5b3
     report: 2026-06-21-codebase-assessment.md
-    status: open
+    status: verified
+    remediation_report: 2026-06-21-codebase-remediation.md
+    implementation_commits:
+      - a6db7d93793262ef41a97fa032165199c56ebd39
+      - ebf7b36a3799e5ec748c75df26101313831de2e1
+    verified_at: 2026-06-21
+    resolution:
+      verified: 8
+      open: 0
+    ci:
+      - https://github.com/mjincoin/QuantaEngine/actions/runs/27893878011
+      - https://github.com/QuantaEngine/QuantaEngine/actions/runs/27893878659
     summary:
       p0: 0
       p1: 5
@@ -13,33 +24,41 @@ reviews:
     findings:
       - id: QE-2026-001
         severity: P1
-        status: open
+        status: verified
+        fixed_in: a6db7d93793262ef41a97fa032165199c56ebd39
         category: concurrency
       - id: QE-2026-002
         severity: P1
-        status: open
+        status: verified
+        fixed_in: a6db7d93793262ef41a97fa032165199c56ebd39
         category: scoring
       - id: QE-2026-003
         severity: P1
-        status: open
+        status: verified
+        fixed_in: a6db7d93793262ef41a97fa032165199c56ebd39
         category: reproducibility
       - id: QE-2026-004
         severity: P1
-        status: open
+        status: verified
+        fixed_in: a6db7d93793262ef41a97fa032165199c56ebd39
         category: adversarial-loop
       - id: QE-2026-005
         severity: P1
-        status: open
+        status: verified
+        fixed_in: a6db7d93793262ef41a97fa032165199c56ebd39
         category: compatibility
       - id: QE-2026-006
         severity: P2
-        status: open
+        status: verified
+        fixed_in: a6db7d93793262ef41a97fa032165199c56ebd39
         category: portability
       - id: QE-2026-007
         severity: P2
-        status: open
+        status: verified
+        fixed_in: a6db7d93793262ef41a97fa032165199c56ebd39
         category: optimization
       - id: QE-2026-008
         severity: P2
-        status: planned
+        status: verified
+        fixed_in: ebf7b36a3799e5ec748c75df26101313831de2e1
         category: engineering-release

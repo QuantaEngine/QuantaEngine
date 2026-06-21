@@ -25,7 +25,7 @@
 
 | Review ID | 日期 | 基线提交 | 状态 | P1 | P2 | 报告 |
 |---|---|---|---|---:|---:|---|
-| `QE-REVIEW-2026-06-21` | 2026-06-21 | `6050e48` | open | 5 | 3 | [2026-06-21-codebase-assessment.md](2026-06-21-codebase-assessment.md) |
+| `QE-REVIEW-2026-06-21` | 2026-06-21 | `6050e48` | verified | 5 | 3 | [原评估](2026-06-21-codebase-assessment.md) / [修复复审](2026-06-21-codebase-remediation.md) |
 
 机器可读索引见 [index.yaml](index.yaml)。
 

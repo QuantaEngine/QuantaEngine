@@ -41,7 +41,12 @@
 
 最终命令结果由 `execution/run_remediation.py` 写入
 `records/remediation-evidence.json`。独立复审结论保存在
-`docs/reviews/2026-06-21-codebase-remediation.md`；远端提交和 CI 证据在发布后补入。
+`docs/reviews/2026-06-21-codebase-remediation.md`。两个远端均验证 `ebf7b36`：
+
+- `mjincoin/QuantaEngine`：[Actions 27893878011](https://github.com/mjincoin/QuantaEngine/actions/runs/27893878011)
+- `QuantaEngine/QuantaEngine`：[Actions 27893878659](https://github.com/QuantaEngine/QuantaEngine/actions/runs/27893878659)
+
+两条 run 的 Python 3.11-3.13 pytest 与 quality 共 12 个 job 全部成功。
 
 ## 剩余边界
 
