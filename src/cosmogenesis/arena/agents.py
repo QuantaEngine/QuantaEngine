@@ -7,11 +7,9 @@ DefensePrior: defend by default, accept only hard reproducible errors.
 
 from __future__ import annotations
 
-import itertools
-
 import numpy as np
 
-from ..core import ParameterVector, fragility_profile
+from ..core import ParameterVector, fragility_profile, stable_identifier, stable_seed
 from . import bridge
 from .cards import (
     ChallengeCard,
@@ -26,18 +24,24 @@ from .cards import (
 )
 from .theory import TheorySpec
 
-_counter = itertools.count(1)
-
-
-def _cid() -> str:
-    return f"CH-{next(_counter):05d}"
-
 
 class TheoryAgent:
     """One agent per theory; behaviour parameterized by the theory's philosophy."""
 
-    def __init__(self, theory: TheorySpec) -> None:
+    def __init__(self, theory: TheorySpec, run_seed: int = 0) -> None:
         self.theory = theory
+        self.run_seed = run_seed
+
+    def _challenge_id(self, target: TheorySpec, challenge_type: ChallengeType) -> str:
+        return stable_identifier(
+            "CH",
+            self.run_seed,
+            self.theory.theory_id,
+            self.theory.version,
+            target.theory_id,
+            target.version,
+            challenge_type.value,
+        )
 
     # ---------------- attack ----------------
     def attack(self, target: TheorySpec) -> list[ChallengeCard]:
@@ -64,7 +68,7 @@ class TheoryAgent:
         profile = fragility_profile(seed, lambda v: bridge.assess(target, v).score, epsilon=0.05)
         if not profile:
             return []
-        axis = max(profile, key=profile.get)
+        axis = max(profile, key=lambda name: profile[name])
         drop = profile[axis]
         if drop < 0.25:
             return []
@@ -73,12 +77,12 @@ class TheoryAgent:
         probe[idx] = min(1.0, probe[idx] + 0.05)
         return [
             ChallengeCard(
-                challenge_id=_cid(),
+                challenge_id=self._challenge_id(target, ChallengeType.FRAGILITY),
                 source_theory_id=self.theory.theory_id,
                 target_theory_id=target.theory_id,
                 challenge_type=ChallengeType.FRAGILITY,
                 severity=Severity.MAJOR if drop > 0.5 else Severity.MINOR,
-                summary=f"Champion is fragile along '{axis}' ({drop*100:.0f}% drop on 5% nudge).",
+                summary=f"Champion is fragile along '{axis}' ({drop * 100:.0f}% drop on 5% nudge).",
                 detailed_argument="A robust universe theory should not collapse under a small "
                 "perturbation of a fundamental constant.",
                 evidence=[
@@ -95,7 +99,9 @@ class TheoryAgent:
         ]
 
     def _attack_overfitting(self, target) -> list[ChallengeCard]:
-        rng = np.random.default_rng(abs(hash(target.theory_id)) % (2**32))
+        rng = np.random.default_rng(
+            stable_seed(self.run_seed, "agent-overfitting", target.theory_id, target.version)
+        )
         base = np.array(bridge.seed_vector(target).to_normalized())
         feasible = 0
         for _ in range(6):
@@ -107,7 +113,9 @@ class TheoryAgent:
             return []
         return [
             ChallengeCard(
-                challenge_id=_cid(),
+                challenge_id=self._challenge_id(
+                    target, ChallengeType.OVERFITTING_TO_STANDARD_UNIVERSE
+                ),
                 source_theory_id=self.theory.theory_id,
                 target_theory_id=target.theory_id,
                 challenge_type=ChallengeType.OVERFITTING_TO_STANDARD_UNIVERSE,
@@ -134,7 +142,7 @@ class TheoryAgent:
             return []
         return [
             ChallengeCard(
-                challenge_id=_cid(),
+                challenge_id=self._challenge_id(target, ChallengeType.UNDERCONSTRAINED_PARAMETER),
                 source_theory_id=self.theory.theory_id,
                 target_theory_id=target.theory_id,
                 challenge_type=ChallengeType.UNDERCONSTRAINED_PARAMETER,

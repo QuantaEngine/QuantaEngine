@@ -8,6 +8,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
+from ..core import code_revision, object_fingerprint, software_version, stable_identifier
 from . import bridge, scoring
 from .ledger import append_history, write_iteration_plan
 from .registry import TheoryRegistry
@@ -25,6 +26,10 @@ class GenerationSnapshot(BaseModel):
 
 
 class EvolutionReport(BaseModel):
+    run_id: str
+    run_seed: int = 0
+    software_version: str
+    code_revision: str | None = None
     generations: list[GenerationSnapshot] = Field(default_factory=list)
     final_theory_ids: list[str] = Field(default_factory=list)
     final_families: list[str] = Field(default_factory=list)
@@ -85,7 +90,11 @@ def _select_next_generation(
 
     # de-dup preserving order (pareto front + elites come first, so a trim keeps them)
     seen: set[str] = set()
-    ordered = [tid for tid in keep_ids if not (tid in seen or seen.add(tid))]
+    ordered = []
+    for theory_id in keep_ids:
+        if theory_id not in seen:
+            seen.add(theory_id)
+            ordered.append(theory_id)
     return [registry.get(tid) for tid in ordered[:population_size]]
 
 
@@ -103,6 +112,8 @@ def evolve(
     lineage_root: str | Path | None = None,
     plan_dir: str | Path | None = None,
     persist_forks: bool = False,
+    run_seed: int = 0,
+    novelty_threshold: float = 0.4,
 ) -> EvolutionReport:
     """Evolve the population.
 
@@ -113,9 +124,27 @@ def evolve(
     calls never touch the repo; the CLI turns them on.
     """
 
-    report = EvolutionReport()
+    run_id = stable_identifier(
+        "RUN",
+        run_seed,
+        [(theory.theory_id, object_fingerprint(theory)) for theory in theories],
+        generations,
+        rounds,
+        min_families,
+        elites_per_family,
+        population_size,
+        optimize_budget,
+    )
+    revision_root = Path(lineage_root).resolve().parent if lineage_root is not None else None
+    report = EvolutionReport(
+        run_id=run_id,
+        run_seed=run_seed,
+        software_version=software_version(),
+        code_revision=code_revision(revision_root),
+    )
     current = list(theories)
     archive: dict[str, TheorySpec] = {}
+    novelty_archive: list[list[float]] = []
     last_scores: list = []
 
     for g in range(generations):
@@ -132,15 +161,23 @@ def evolve(
         # Durable history goes to theories/ via the ledger below, so we do not write
         # the redundant ephemeral per-event log here.
         tour: TournamentReport = run_tournament(
-            current, registry, rounds=rounds, generation=g, parallel=parallel,
+            current,
+            registry,
+            rounds=rounds,
+            generation=g,
+            parallel=parallel,
+            run_seed=run_seed,
+            novelty_archive=novelty_archive,
         )
 
         last_scores = tour.scores
 
         # 3. archive valid + novel theories.
         for s in tour.scores:
-            if s.validity >= 1.0 and s.novelty >= 0.5:
+            if s.validity >= 1.0 and s.novelty >= novelty_threshold:
                 archive[s.theory_id] = registry.get(s.theory_id)
+            theory = registry.get(s.theory_id)
+            novelty_archive.append(bridge.novelty_features(theory, bridge.seed_vector(theory)))
 
         # 3b. durable per-lineage history (git-tracked) when requested.
         if lineage_root is not None:
@@ -151,9 +188,14 @@ def evolve(
                         events_by_theory.setdefault(ev.theory_id, []).append(ev)
             for s in tour.scores:
                 append_history(
-                    registry.get(s.theory_id), g, s,
+                    registry.get(s.theory_id),
+                    g,
+                    s,
                     events_by_theory.get(s.theory_id, []),
-                    root=lineage_root, persist_spec=persist_forks,
+                    root=lineage_root,
+                    persist_spec=persist_forks,
+                    run_id=run_id,
+                    run_seed=run_seed,
                 )
 
         # 4. anti-collapse selection of next generation.
@@ -185,8 +227,13 @@ def evolve(
     if plan_dir is not None and report.generations:
         report.iteration_plan = str(
             write_iteration_plan(
-                last_scores, registry, report.generations[-1].pareto_front,
-                plan_dir, report.generations[-1].generation,
+                last_scores,
+                registry,
+                report.generations[-1].pareto_front,
+                plan_dir,
+                report.generations[-1].generation,
+                run_id=run_id,
+                run_seed=run_seed,
             )
         )
 
@@ -204,6 +251,10 @@ def _write(report: EvolutionReport, out_dir: Path) -> None:
         "# GenesisArena Parallel Evolution Report",
         "",
         f"- allow_merge: **{report.allow_merge}** (theories are never merged)",
+        f"- run_id: `{report.run_id}`",
+        f"- run_seed: `{report.run_seed}`",
+        f"- software_version: `{report.software_version}`",
+        f"- code_revision: `{report.code_revision or 'unknown'}`",
         f"- final families: **{', '.join(report.final_families)}**",
         f"- final theories: {', '.join(report.final_theory_ids)}",
         f"- novelty archive: {', '.join(report.archive_ids) or '(none)'}",

@@ -7,10 +7,12 @@ claims, a philosophy, a version and a parent. The registry lives in ``registry.p
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
+
+from ..core import NDIM
 
 
 class TheoryPhilosophy(BaseModel):
@@ -32,7 +34,7 @@ class DefensePrior(BaseModel):
 class LineagePolicy(BaseModel):
     allow_patch: bool = True
     allow_fork: bool = True
-    allow_merge: bool = False  # invariant: theories are never merged
+    allow_merge: Literal[False] = False
     preserve_parent: bool = True
 
 
@@ -46,14 +48,14 @@ class Claim(BaseModel):
 class TheorySpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    theory_id: str
+    theory_id: str = Field(pattern=r"^T-\d{4,}$")
     name: str
-    family: str
-    version: str = "0.1.0"
+    family: str = Field(pattern=r"^[a-z][a-z0-9_]*$")
+    version: str = Field(default="0.1.0", pattern=r"^\d+\.\d+\.\d+$")
     parent_id: str | None = None
 
     # which scheme generates this theory's universes (key in cosmogenesis.schemes).
-    engine: str  # "analytic_compiler" | "variational_relaxer" | "minimal_axiom"
+    engine: str = Field(pattern=r"^[a-z][a-z0-9_]*$")
     base_config: str = "configs/standard_universe.yaml"
     # optional starting point in the shared parameter space (defaults to config).
     seed_vector: list[float] | None = None
@@ -65,6 +67,44 @@ class TheorySpec(BaseModel):
     defense_prior: DefensePrior = Field(default_factory=DefensePrior)
     lineage_policy: LineagePolicy = Field(default_factory=LineagePolicy)
 
+    _source_path: Path | None = PrivateAttr(default=None)
+
+    @field_validator("parent_id")
+    @classmethod
+    def _valid_parent_id(cls, value: str | None) -> str | None:
+        if value is not None and (not value.startswith("T-") or not value[2:].isdigit()):
+            raise ValueError("parent_id must use the T-NNNN form")
+        return value
+
+    @field_validator("seed_vector")
+    @classmethod
+    def _valid_seed_vector(cls, value: list[float] | None) -> list[float] | None:
+        if value is not None and len(value) != NDIM:
+            raise ValueError(f"seed_vector must contain {NDIM} values")
+        return value
+
+    def resolve_base_config(self, workspace_root: str | Path | None = None) -> Path:
+        configured = Path(self.base_config).expanduser()
+        if configured.is_absolute():
+            return configured.resolve()
+        roots: list[Path] = []
+        if workspace_root is not None:
+            roots.append(Path(workspace_root).expanduser().resolve())
+        if self._source_path is not None:
+            roots.extend(self._source_path.parent.parents)
+            roots.insert(0, self._source_path.parent)
+        roots.append(Path.cwd())
+        attempted: list[Path] = []
+        for root in roots:
+            candidate = (root / configured).resolve()
+            if candidate in attempted:
+                continue
+            attempted.append(candidate)
+            if candidate.is_file():
+                return candidate
+        tried = ", ".join(str(path) for path in attempted)
+        raise FileNotFoundError(f"base_config '{self.base_config}' not found; tried: {tried}")
+
     def bump_patch(self) -> str:
         major, minor, patch = (int(x) for x in self.version.split("."))
         return f"{major}.{minor}.{patch + 1}"
@@ -75,8 +115,11 @@ class TheorySpec(BaseModel):
 
 
 def load_theory(path: str | Path) -> TheorySpec:
-    data = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
-    return TheorySpec.model_validate(data)
+    source = Path(path).expanduser().resolve()
+    data = yaml.safe_load(source.read_text(encoding="utf-8"))
+    theory = TheorySpec.model_validate(data)
+    theory._source_path = source
+    return theory
 
 
 def save_theory(theory: TheorySpec, path: str | Path) -> None:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -22,6 +23,15 @@ class UniverseAssessment:
     diagnostics: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
 
+    def __post_init__(self) -> None:
+        if not math.isfinite(self.score) or not 0.0 <= self.score <= 1.0:
+            raise ValueError("assessment score must be finite and in [0, 1]")
+        if not math.isfinite(self.residual) or self.residual < 0.0:
+            raise ValueError("assessment residual must be finite and non-negative")
+        for name, value in self.margins.items():
+            if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+                raise ValueError(f"assessment margin '{name}' must be finite and in [0, 1]")
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
@@ -32,8 +42,6 @@ def softmin(values: list[float], sharpness: float = 8.0) -> float:
     Used by Scheme B so a single failing window pulls the score down without the
     hard discontinuities Scheme A uses.
     """
-
-    import math
 
     if not values:
         return 0.0
@@ -50,8 +58,6 @@ def logistic_window(value: float, lo: float, hi: float, width_frac: float = 0.15
 
     Returns ~1 well inside the window, ~0 well outside, smooth at the edges.
     """
-
-    import math
 
     if value <= 0 or lo <= 0 or hi <= 0:
         return 0.0

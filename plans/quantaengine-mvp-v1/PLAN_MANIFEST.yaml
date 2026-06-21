@@ -14,9 +14,9 @@ tooling:
   - id: ruff
     command: ["{python}", "-m", "ruff", "check", "src", "tests", "examples", "plans/quantaengine-mvp-v1/execution"]
   - id: format
-    command: ["{python}", "-m", "ruff", "format", "--check", "src/quanta_engine", "tests", "examples", "plans/quantaengine-mvp-v1/execution"]
+    command: ["{python}", "-m", "ruff", "format", "--check", "src", "tests", "examples", "plans/quantaengine-mvp-v1/execution"]
   - id: mypy
-    command: ["{python}", "-m", "mypy", "src/quanta_engine"]
+    command: ["{python}", "-m", "mypy", "src"]
   - id: dependencies
     command: ["{python}", "-m", "pip", "check"]
 

@@ -102,6 +102,7 @@ code changes.
 
 ```bash
 python -m cosmogenesis theory-list
+python -m cosmogenesis --workspace /path/to/quanta-engine theory-list
 python -m cosmogenesis duel theories/T-0001_conservative_eft/theory.yaml \
                             theories/T-0003_minimal_axiom/theory.yaml --rounds 1
 python -m cosmogenesis evolve --generations 3 --min-families 3 --no-merge --out reports/arena
@@ -166,10 +167,14 @@ Codebase assessments and remediation tracking are archived under [docs/reviews/]
 ```bash
 python -m pytest
 ruff check src tests examples
-mypy src/quanta_engine
+ruff format --check src tests examples
+mypy src
+python -m build
 ```
 
-GitHub Actions runs the test suite and generates a standard-universe Markdown and JSON report on every push and pull request.
+GitHub Actions runs tests on Python 3.11-3.13, checks lint/format/types, builds the
+wheel, smoke-tests the installed APIs and CLI, and regenerates the standard-universe
+report on every push and pull request.
 
 ## License
 

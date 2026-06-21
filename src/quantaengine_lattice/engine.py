@@ -87,7 +87,9 @@ class QuantaEngine:
 
         for i in range(1, steps + 1):
             bg_state = background.step(p.time_step)
-            lattice.step(p.time_step, bg_state.scale_factor, background.hubble(bg_state.scale_factor))
+            lattice.step(
+                p.time_step, bg_state.scale_factor, background.hubble(bg_state.scale_factor)
+            )
             times[i] = bg_state.time
             scale_factors[i] = bg_state.scale_factor
             if i % snapshot_every == 0 or i == steps:

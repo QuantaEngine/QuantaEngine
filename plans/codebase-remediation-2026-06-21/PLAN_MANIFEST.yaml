@@ -1,0 +1,55 @@
+schema_version: 1
+plan_id: codebase-remediation-2026-06-21
+title: QuantaEngine codebase assessment remediation
+status: implemented_pending_final_verification
+baseline_commit: 6050e48e095fc87770c7b1e02fc1883f675fe5b3
+assessment: ../../docs/reviews/2026-06-21-codebase-assessment.md
+remediation_report: ../../docs/reviews/2026-06-21-codebase-remediation.md
+
+findings:
+  - id: QE-2026-001
+    area: deterministic concurrency
+    regression: tests/test_remediation.py::test_concurrent_forks_allocate_unique_ids
+  - id: QE-2026-002
+    area: novelty scoring
+    regression: tests/test_remediation.py::test_novelty_excludes_self_and_uses_behavior_features
+  - id: QE-2026-003
+    area: reproducibility
+    regression: tests/test_remediation.py::test_stable_seed_ignores_python_hash_salt
+  - id: QE-2026-004
+    area: adversarial scoring closure
+    regression: tests/test_remediation.py::test_adversarial_outcome_changes_score_and_handles_invalidation
+  - id: QE-2026-005
+    area: compatibility and versioning
+    regression: tests/test_remediation.py::test_legacy_namespace_and_versions_are_consistent
+  - id: QE-2026-006
+    area: workspace portability
+    regression: tests/test_remediation.py::test_cli_workspace_and_version_from_arbitrary_cwd
+  - id: QE-2026-007
+    area: logarithmic search geometry
+    regression: tests/test_remediation.py::test_log_axis_uses_equal_decade_steps
+  - id: QE-2026-008
+    area: quality and release gates
+    regression: tests/test_remediation.py
+
+tooling:
+  - id: targeted-regressions
+    command: ["{python}", "-m", "pytest", "tests/test_remediation.py", "-q"]
+  - id: full-tests
+    command: ["{python}", "-m", "pytest"]
+  - id: lint
+    command: ["{python}", "-m", "ruff", "check", "src", "tests", "examples", "plans/quantaengine-mvp-v1/execution", "plans/codebase-remediation-2026-06-21/execution"]
+  - id: format
+    command: ["{python}", "-m", "ruff", "format", "--check", "src", "tests", "examples", "plans/quantaengine-mvp-v1/execution", "plans/codebase-remediation-2026-06-21/execution"]
+  - id: types
+    command: ["{python}", "-m", "mypy", "src"]
+  - id: dependencies
+    command: ["{python}", "-m", "pip", "check"]
+  - id: build
+    command: ["{python}", "-m", "build"]
+
+artifacts:
+  - docs/reviews/2026-06-21-codebase-remediation.md
+  - plans/codebase-remediation-2026-06-21/EXECUTION_REPORT.md
+  - plans/codebase-remediation-2026-06-21/TRACEABILITY_MATRIX.md
+  - plans/codebase-remediation-2026-06-21/records/remediation-evidence.json

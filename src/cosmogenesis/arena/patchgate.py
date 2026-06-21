@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ..core import ParameterVector
+from ..core import ParameterVector, stable_seed
 from . import bridge
 from .cards import ChallengeCard, JudgeDecision, JudgeResult, PatchEvent, PatchOutcome
 from .registry import TheoryRegistry
@@ -16,9 +16,15 @@ from .theory import TheorySpec
 
 
 class PatchGate:
-    def __init__(self, registry: TheoryRegistry, history_dir: str | Path | None = None) -> None:
+    def __init__(
+        self,
+        registry: TheoryRegistry,
+        history_dir: str | Path | None = None,
+        run_seed: int = 0,
+    ) -> None:
         self.registry = registry
         self.history_dir = Path(history_dir) if history_dir else None
+        self.run_seed = run_seed
 
     def process(
         self,
@@ -30,9 +36,15 @@ class PatchGate:
         events: list[PatchEvent] = []
 
         for challenge, judge in decisions:
-            if judge.decision == JudgeDecision.PATCH_REQUIRED and current.lineage_policy.allow_patch:
+            if (
+                judge.decision == JudgeDecision.PATCH_REQUIRED
+                and current.lineage_policy.allow_patch
+            ):
                 current, event = self._patch(current, challenge)
-            elif judge.decision == JudgeDecision.FORK_RECOMMENDED and current.lineage_policy.allow_fork:
+            elif (
+                judge.decision == JudgeDecision.FORK_RECOMMENDED
+                and current.lineage_policy.allow_fork
+            ):
                 event = self._fork(current, challenge)
             elif judge.decision == JudgeDecision.THEORY_INVALIDATED:
                 event = PatchEvent(
@@ -73,32 +85,44 @@ class PatchGate:
     # --- fork: NEW lineage, parent preserved unchanged ---
     def _fork(self, theory: TheorySpec, challenge: ChallengeCard) -> PatchEvent:
         ctype = challenge.challenge_type.value
-        # Rate-limit: never fork a fork, and fork each root at most once per concern.
-        already = theory.parent_id is not None or any(
-            t.parent_id == theory.theory_id and ctype in t.name for t in self.registry.all()
-        )
-        if already:
-            return PatchEvent(
-                theory_id=theory.theory_id,
-                based_on_challenge_id=challenge.challenge_id,
-                outcome=PatchOutcome.UNCHANGED,
-                summary=f"concern '{ctype}' already addressed by an existing fork; no new lineage",
+        with self.registry.transaction():
+            # Rate-limit: never fork a fork, and fork each root at most once per concern.
+            already = theory.parent_id is not None or any(
+                t.parent_id == theory.theory_id and ctype in t.name for t in self.registry.all()
             )
-        child_id = self.registry.next_theory_id()
-        rng = np.random.default_rng(abs(hash(child_id)) % (2**32))
-        base = np.array(bridge.seed_vector(theory).to_normalized())
-        explored = np.clip(base + rng.normal(0, 0.25, size=base.shape), 0, 1)
-        child = theory.model_copy(
-            update={
-                "theory_id": child_id,
-                "name": f"{theory.name} (fork: {challenge.challenge_type.value})",
-                "version": "0.1.0",
-                "parent_id": theory.theory_id,
-                "family": f"{theory.family}_explore",
-                "seed_vector": list(ParameterVector.from_normalized(list(explored)).values),
-            }
-        )
-        self.registry.add(child)  # parent stays in the registry, untouched
+            if already:
+                return PatchEvent(
+                    theory_id=theory.theory_id,
+                    based_on_challenge_id=challenge.challenge_id,
+                    outcome=PatchOutcome.UNCHANGED,
+                    summary=(
+                        f"concern '{ctype}' already addressed by an existing fork; no new lineage"
+                    ),
+                )
+            child_id = self.registry.next_theory_id()
+            rng = np.random.default_rng(
+                stable_seed(
+                    self.run_seed,
+                    "fork",
+                    child_id,
+                    theory.theory_id,
+                    theory.version,
+                    challenge.challenge_id,
+                )
+            )
+            base = np.array(bridge.seed_vector(theory).to_normalized())
+            explored = np.clip(base + rng.normal(0, 0.25, size=base.shape), 0, 1)
+            child = theory.model_copy(
+                update={
+                    "theory_id": child_id,
+                    "name": f"{theory.name} (fork: {challenge.challenge_type.value})",
+                    "version": "0.1.0",
+                    "parent_id": theory.theory_id,
+                    "family": f"{theory.family}_explore",
+                    "seed_vector": list(ParameterVector.from_normalized(list(explored)).values),
+                }
+            )
+            self.registry.add(child)  # parent stays in the registry, untouched
         return PatchEvent(
             theory_id=theory.theory_id,
             based_on_challenge_id=challenge.challenge_id,
@@ -110,7 +134,9 @@ class PatchGate:
     def _robust_reseed(self, theory: TheorySpec, samples: int = 24) -> ParameterVector:
         """Pick the nearby point maximizing worst-case score over a small ball."""
 
-        rng = np.random.default_rng(abs(hash(theory.theory_id + theory.version)) % (2**32))
+        rng = np.random.default_rng(
+            stable_seed(self.run_seed, "robust-reseed", theory.theory_id, theory.version)
+        )
         base = np.array(bridge.seed_vector(theory).to_normalized())
         best_vec = bridge.seed_vector(theory)
         best_robust = -1.0

@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from pydantic import BaseModel, Field
 
+from ..core import stable_seed
 from . import bridge
 from .agents import TheoryAgent
 from .cards import ChallengeCard, DefenseCard, JudgeResult, PatchEvent
@@ -42,9 +43,10 @@ def _one_direction(
     verifier: Verifier,
     judge: Judge,
     gate: PatchGate,
+    run_seed: int,
 ) -> tuple[TheorySpec, list[ChallengeCard], list[DefenseCard], list[JudgeResult], list[PatchEvent]]:
-    challenges = TheoryAgent(attacker).attack(defender)
-    defenses = TheoryAgent(defender).defend(challenges)
+    challenges = TheoryAgent(attacker, run_seed=run_seed).attack(defender)
+    defenses = TheoryAgent(defender, run_seed=run_seed).defend(challenges)
     defense_by_ch = {d.challenge_id: d for d in defenses}
     judge_results: list[JudgeResult] = []
     decisions = []
@@ -63,25 +65,32 @@ def run_duel(
     registry: TheoryRegistry,
     rounds: int = 1,
     history_dir: str | None = None,
+    run_seed: int = 0,
 ) -> DuelReport:
     assert theory_a.lineage_policy.allow_merge is False
     assert theory_b.lineage_policy.allow_merge is False
 
     verifier, judge = Verifier(), Judge()
-    gate = PatchGate(registry, history_dir=history_dir)
+    gate = PatchGate(registry, history_dir=history_dir, run_seed=run_seed)
     cur_a, cur_b = theory_a, theory_b
     report = DuelReport(theory_a_id=theory_a.theory_id, theory_b_id=theory_b.theory_id)
 
     for r in range(rounds):
         # run both universes in parallel (engine evaluations release the GIL on numpy work)
         with ThreadPoolExecutor(max_workers=2) as pool:
-            fa = pool.submit(lambda t=cur_a: bridge.assess(t, bridge.seed_vector(t)))
-            fb = pool.submit(lambda t=cur_b: bridge.assess(t, bridge.seed_vector(t)))
+            fa = pool.submit(bridge.assess, cur_a, bridge.seed_vector(cur_a))
+            fb = pool.submit(bridge.assess, cur_b, bridge.seed_vector(cur_b))
             out_a, out_b = fa.result(), fb.result()
 
         # B attacks A, then A attacks B (sequential so patches land deterministically)
-        cur_a, ch_ba, df_a, jr_ba, ev_a = _one_direction(cur_b, cur_a, verifier, judge, gate)
-        cur_b, ch_ab, df_b, jr_ab, ev_b = _one_direction(cur_a, cur_b, verifier, judge, gate)
+        seed_ba = stable_seed(run_seed, theory_a.theory_id, theory_b.theory_id, r, "b-attacks-a")
+        seed_ab = stable_seed(run_seed, theory_a.theory_id, theory_b.theory_id, r, "a-attacks-b")
+        cur_a, ch_ba, df_a, jr_ba, ev_a = _one_direction(
+            cur_b, cur_a, verifier, judge, gate, seed_ba
+        )
+        cur_b, ch_ab, df_b, jr_ab, ev_b = _one_direction(
+            cur_a, cur_b, verifier, judge, gate, seed_ab
+        )
 
         report.rounds.append(
             DuelRound(

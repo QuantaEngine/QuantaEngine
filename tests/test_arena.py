@@ -75,13 +75,29 @@ def test_score_vector_in_range(registry):
 
 def test_pareto_dominance():
     a = scoring.TheoryScoreVector(
-        theory_id="A", family="f", version="0.1.0", validity=1, physical_consistency=1,
-        benchmark_fit=1, generative_power=1, robustness=1, novelty=1, simplicity=1,
+        theory_id="A",
+        family="f",
+        version="0.1.0",
+        validity=1,
+        physical_consistency=1,
+        benchmark_fit=1,
+        generative_power=1,
+        robustness=1,
+        novelty=1,
+        simplicity=1,
         computational_efficiency=1,
     )
     b = scoring.TheoryScoreVector(
-        theory_id="B", family="f", version="0.1.0", validity=0.5, physical_consistency=0.5,
-        benchmark_fit=0.5, generative_power=0.5, robustness=0.5, novelty=0.5, simplicity=0.5,
+        theory_id="B",
+        family="f",
+        version="0.1.0",
+        validity=0.5,
+        physical_consistency=0.5,
+        benchmark_fit=0.5,
+        generative_power=0.5,
+        robustness=0.5,
+        novelty=0.5,
+        simplicity=0.5,
         computational_efficiency=0.5,
     )
     assert scoring.pareto_dominates(a, b)
@@ -155,8 +171,12 @@ def test_fork_preserves_parent_and_never_merges(registry):
     from cosmogenesis.arena.cards import JudgeResult
 
     jr = JudgeResult(
-        judge_result_id="J-fork", challenge_id="CH-fork", target_theory_id="T-0002",
-        decision=JudgeDecision.FORK_RECOMMENDED, severity=Severity.MINOR, rationale="x",
+        judge_result_id="J-fork",
+        challenge_id="CH-fork",
+        target_theory_id="T-0002",
+        decision=JudgeDecision.FORK_RECOMMENDED,
+        severity=Severity.MINOR,
+        rationale="x",
         fork_recommended=True,
     )
     _, events = gate.process(target, [(ch, jr)])
@@ -186,8 +206,13 @@ def test_tournament_keeps_families(registry):
 
 def test_evolution_parallel_no_collapse(registry, tmp_path):
     rep = evolve(
-        registry.all(), registry, generations=2, rounds=1, min_families=3,
-        population_size=10, out_dir=tmp_path,
+        registry.all(),
+        registry,
+        generations=2,
+        rounds=1,
+        min_families=3,
+        population_size=10,
+        out_dir=tmp_path,
     )
     assert rep.allow_merge is False
     assert len(rep.final_families) >= 3  # anti-collapse: multiple lineages survive
@@ -221,8 +246,14 @@ def test_ledger_persists_history_and_plan(tmp_path):
         h.unlink()  # start from a clean copy so record counts are deterministic
     reg = TheoryRegistry.from_dir(str(src))
     rep = evolve(
-        reg.all(), reg, generations=2, min_families=3, population_size=8,
-        lineage_root=str(src), plan_dir=str(plans), persist_forks=True,
+        reg.all(),
+        reg,
+        generations=2,
+        min_families=3,
+        population_size=8,
+        lineage_root=str(src),
+        plan_dir=str(plans),
+        persist_forks=True,
     )
     # per-lineage history.jsonl with 2 generation records for each seed lineage
     for tid in ("T-0001", "T-0002", "T-0003"):

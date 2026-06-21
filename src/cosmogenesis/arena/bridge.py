@@ -23,13 +23,13 @@ def _load(config_path: str):
 def build_engine(theory: TheorySpec):
     """Instantiate the scheme engine named by ``theory.engine``."""
 
-    return build_scheme(theory.engine, _load(theory.base_config))
+    return build_scheme(theory.engine, _load(str(theory.resolve_base_config())))
 
 
 def seed_vector(theory: TheorySpec) -> ParameterVector:
     if theory.seed_vector is not None:
         return ParameterVector(list(theory.seed_vector))
-    return vector_from_config(_load(theory.base_config))
+    return vector_from_config(_load(str(theory.resolve_base_config())))
 
 
 def assess(theory: TheorySpec, vector: ParameterVector) -> UniverseAssessment:

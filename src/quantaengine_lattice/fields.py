@@ -53,7 +53,9 @@ class ScalarFieldLattice:
     def grad_squared(self, field: np.ndarray) -> np.ndarray:
         total = np.zeros_like(field)
         for axis in range(field.ndim):
-            grad = (np.roll(field, -1, axis=axis) - np.roll(field, 1, axis=axis)) / (2.0 * self.params.dx)
+            grad = (np.roll(field, -1, axis=axis) - np.roll(field, 1, axis=axis)) / (
+                2.0 * self.params.dx
+            )
             total += grad**2
         return total
 

@@ -159,7 +159,9 @@ class VariationalRelaxer(BaseEngine):
         score = base_margin * math.exp(-self._residual_lambda * residual)
         warnings = []
         if not e.relax_converged:
-            warnings.append("self-consistency relaxation did not converge (internally inconsistent)")
+            warnings.append(
+                "self-consistency relaxation did not converge (internally inconsistent)"
+            )
         for name, val in e.residual_terms.items():
             if val > 0.05:
                 warnings.append(f"high self-consistency residual: {name}={val:.3f}")

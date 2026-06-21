@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 - 2026-06-21
 
 - Added `cosmogenesis`, a multi-scheme parallel adversarial universe-generation
   platform, organized into three clearly named layers
@@ -19,7 +19,13 @@
   (`T-0001`/`T-0002`/`T-0003`).
 - Renamed the legacy `quantaengine` package to `quantaengine_lattice` to remove the
   near-identical-name confusion with `quanta_engine` (the `quantaengine` console
-  script is unchanged).
+  script is unchanged). A deprecated `quantaengine` Python namespace remains as a
+  compatibility shim through the 0.x series.
+- Made arena runs deterministic across Python hash salts and parallel scheduling,
+  serialized lineage commits, fixed novelty self-exclusion, and connected judge
+  outcomes to selection scores.
+- Added workspace-independent theory resolution, logarithmic parameter geometry,
+  replay metadata, monotonic lineage history, and full quality/build CI gates.
 - Retired the earlier two-scheme "consensus" arena in favour of the no-merge,
   multi-lineage platform above.
 - Design docs: `docs/design/REPO_STRUCTURE.md`,

@@ -7,8 +7,9 @@ import math
 import numpy as np
 from pydantic import BaseModel, Field
 
-from ..core import ParameterVector, fragility_profile
+from ..core import ParameterVector, fragility_profile, stable_seed
 from . import bridge
+from .cards import JudgeDecision, JudgeResult, PatchEvent, PatchOutcome
 from .theory import TheorySpec
 
 OBJECTIVES = (
@@ -61,11 +62,13 @@ def _benchmark_fit(theory: TheorySpec) -> float:
     return out.score
 
 
-def _generative_power(theory: TheorySpec, samples: int = 6) -> float:
+def _generative_power(theory: TheorySpec, samples: int = 6, run_seed: int = 0) -> float:
     """Fraction of perturbed parameter points that remain feasible (can it make
     varied yet self-consistent universes, not just our own)."""
 
-    rng = np.random.default_rng(abs(hash(theory.theory_id)) % (2**32))
+    rng = np.random.default_rng(
+        stable_seed(run_seed, "generative-power", theory.theory_id, theory.version)
+    )
     base = np.array(bridge.seed_vector(theory).to_normalized())
     feasible = 0
     for _ in range(samples):
@@ -94,6 +97,8 @@ def score_theory(
     theory: TheorySpec,
     generation: int = 0,
     unresolved_penalty: float = 0.0,
+    invalidated: bool = False,
+    run_seed: int = 0,
 ) -> TheoryScoreVector:
     seed = bridge.seed_vector(theory)
     out = bridge.assess(theory, seed)
@@ -102,22 +107,55 @@ def score_theory(
         family=theory.family,
         version=theory.version,
         generation=generation,
-        validity=1.0 if out.feasible else 0.0,
-        physical_consistency=float(np.clip(1.0 - out.residual, 0.0, 1.0)),
+        validity=0.0 if invalidated else (1.0 if out.feasible else 0.0),
+        physical_consistency=(0.0 if invalidated else float(np.clip(1.0 - out.residual, 0.0, 1.0))),
         benchmark_fit=_benchmark_fit(theory),
-        generative_power=_generative_power(theory),
+        generative_power=_generative_power(theory, run_seed=run_seed),
         robustness=_robustness(theory),
         novelty=0.0,  # filled in against the archive by update_novelty
         simplicity=_simplicity(theory),
         computational_efficiency=theory.philosophy.computational_efficiency,
-        unresolved_challenge_penalty=float(np.clip(unresolved_penalty, 0.0, 1.0)),
+        unresolved_challenge_penalty=(
+            1.0 if invalidated else float(np.clip(unresolved_penalty, 0.0, 1.0))
+        ),
     )
+
+
+def adversarial_outcome(
+    judge_results: list[JudgeResult], patch_events: list[PatchEvent]
+) -> tuple[float, bool]:
+    """Return unresolved-challenge penalty and invalidation state."""
+
+    event_by_challenge = {event.based_on_challenge_id: event for event in patch_events}
+    unresolved = 0.0
+    considered = 0
+    invalidated = False
+    for result in judge_results:
+        event = event_by_challenge.get(result.challenge_id)
+        if event and event.outcome == PatchOutcome.INVALIDATED:
+            invalidated = True
+        if result.decision == JudgeDecision.THEORY_INVALIDATED:
+            invalidated = True
+        if result.decision == JudgeDecision.CHALLENGE_REJECTED:
+            continue
+        considered += 1
+        if event and event.outcome in (PatchOutcome.PATCHED, PatchOutcome.FORKED):
+            continue
+        if result.decision == JudgeDecision.NEEDS_MORE_TESTS:
+            unresolved += 0.5
+        else:
+            unresolved += 1.0
+    if invalidated:
+        return 1.0, True
+    return (unresolved / considered if considered else 0.0), False
 
 
 def pareto_dominates(a: TheoryScoreVector, b: TheoryScoreVector) -> bool:
     no_worse = all(getattr(a, o) >= getattr(b, o) for o in OBJECTIVES)
-    strictly_better = any(getattr(a, o) > getattr(b, o) for o in OBJECTIVES)
     penalty_ok = a.unresolved_challenge_penalty <= b.unresolved_challenge_penalty
+    strictly_better = any(getattr(a, o) > getattr(b, o) for o in OBJECTIVES) or (
+        a.unresolved_challenge_penalty < b.unresolved_challenge_penalty
+    )
     return no_worse and strictly_better and penalty_ok
 
 

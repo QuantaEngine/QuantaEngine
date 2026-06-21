@@ -58,8 +58,10 @@ class Verifier:
             ):
                 reproduced = gp < 0.34
 
-        is_hard = reproduced and challenge.challenge_type in _HARD_TYPES and (
-            challenge.severity in (Severity.CRITICAL, Severity.FATAL)
+        is_hard = (
+            reproduced
+            and challenge.challenge_type in _HARD_TYPES
+            and (challenge.severity in (Severity.CRITICAL, Severity.FATAL))
         )
         summary = (
             f"reproduced={reproduced}; hard={is_hard}; "

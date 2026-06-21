@@ -15,6 +15,15 @@ from .parameters import (
     vector_from_config,
 )
 from .protocol import BaseEngine, UniverseScheme, fragility_profile
+from .reproducibility import (
+    code_revision,
+    file_sha256,
+    object_fingerprint,
+    software_version,
+    stable_digest,
+    stable_identifier,
+    stable_seed,
+)
 
 __all__ = [
     "ParameterVector",
@@ -29,4 +38,11 @@ __all__ = [
     "UniverseScheme",
     "BaseEngine",
     "fragility_profile",
+    "stable_digest",
+    "stable_seed",
+    "stable_identifier",
+    "object_fingerprint",
+    "file_sha256",
+    "software_version",
+    "code_revision",
 ]

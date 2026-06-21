@@ -8,7 +8,10 @@ from .params import UniverseParams
 
 
 def _k_grid(params: UniverseParams) -> np.ndarray:
-    freqs = [np.fft.fftfreq(params.grid_size, d=params.dx) * 2.0 * np.pi for _ in range(params.dimensions)]
+    freqs = [
+        np.fft.fftfreq(params.grid_size, d=params.dx) * 2.0 * np.pi
+        for _ in range(params.dimensions)
+    ]
     meshes = np.meshgrid(*freqs, indexing="ij")
     k2 = np.zeros(params.shape, dtype=np.float64)
     for axis_k in meshes:
@@ -25,7 +28,7 @@ def primordial_power(k: np.ndarray, params: UniverseParams) -> np.ndarray:
 
     safe_k = np.maximum(k, 1.0e-12)
     p = (safe_k / params.pivot_k) ** (params.spectral_index - 1.0)
-    p *= np.exp(-(safe_k / params.k_cut) ** 2)
+    p *= np.exp(-((safe_k / params.k_cut) ** 2))
     p[k == 0] = 0.0
     return p
 

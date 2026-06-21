@@ -12,6 +12,8 @@ Three layers, each a clearly named subpackage:
 See docs/design/REPO_STRUCTURE.md.
 """
 
+from quanta_engine.version import __version__
+
 from .arena import (
     DuelReport,
     EvolutionReport,
@@ -32,6 +34,7 @@ from .core import (
 from .schemes import build_scheme, list_schemes
 
 __all__ = [
+    "__version__",
     # core contract
     "ParameterVector",
     "UniverseAssessment",
@@ -51,5 +54,3 @@ __all__ = [
     "evolve",
     "EvolutionReport",
 ]
-
-__version__ = "0.3.0"

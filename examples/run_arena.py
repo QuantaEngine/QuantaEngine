@@ -15,9 +15,9 @@ report = evolve(
     registry,
     generations=3,
     min_families=3,
-    out_dir="reports/arena",          # latest human-readable snapshot
-    lineage_root="theories",          # durable per-lineage history.jsonl
-    plan_dir="plans/iterations",      # auto-generated next-iteration plan
+    out_dir="reports/arena",  # latest human-readable snapshot
+    lineage_root="theories",  # durable per-lineage history.jsonl
+    plan_dir="plans/iterations",  # auto-generated next-iteration plan
 )
 
 print("final families:", report.final_families, "| allow_merge:", report.allow_merge)

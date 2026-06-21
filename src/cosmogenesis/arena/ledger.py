@@ -16,6 +16,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from ..core import code_revision, file_sha256, object_fingerprint, software_version
 from .registry import TheoryRegistry
 from .scoring import TheoryScoreVector
 from .theory import TheorySpec, save_theory
@@ -48,6 +49,8 @@ def append_history(
     events: list,
     root: str | Path,
     persist_spec: bool = False,
+    run_id: str = "manual",
+    run_seed: int = 0,
 ) -> Path | None:
     """Append one generation record to a lineage's history.jsonl.
 
@@ -63,9 +66,27 @@ def append_history(
         d.mkdir(parents=True, exist_ok=True)
         save_theory(theory, d / "theory.yaml")
 
+    path = d / "history.jsonl"
+    next_generation = 0
+    if path.is_file():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            try:
+                prior = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            next_generation = max(next_generation, int(prior.get("generation", -1)) + 1)
+
+    config_path = theory.resolve_base_config(Path(root).resolve().parent)
     record = {
         "timestamp": local_now(),
-        "generation": generation,
+        "generation": next_generation,
+        "run_generation": generation,
+        "run_id": run_id,
+        "run_seed": run_seed,
+        "software_version": software_version(),
+        "code_revision": code_revision(Path(root).resolve().parent),
+        "theory_fingerprint": object_fingerprint(theory),
+        "config_sha256": file_sha256(config_path),
         "theory_id": theory.theory_id,
         "family": theory.family,
         "engine": theory.engine,
@@ -91,7 +112,6 @@ def append_history(
             for e in events
         ],
     }
-    path = d / "history.jsonl"
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
     return path
@@ -114,18 +134,22 @@ def write_iteration_plan(
     pareto_front: list[str],
     plans_dir: str | Path,
     generation: int,
+    run_id: str = "manual",
+    run_seed: int = 0,
 ) -> Path:
     """Generate a concrete next-iteration optimization plan and save it."""
 
     plans_dir = Path(plans_dir)
     plans_dir.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().astimezone().strftime("%Y-%m-%dT%H%M%S")
-    path = plans_dir / f"{stamp}_gen{generation}.md"
+    stamp = datetime.now().astimezone().strftime("%Y-%m-%dT%H%M%S.%f")
+    path = plans_dir / f"{stamp}_{run_id}_gen{generation}.md"
 
     lines = [
         f"# Next-iteration optimization plan (after generation {generation})",
         "",
         f"- generated: {local_now()}",
+        f"- run_id: `{run_id}`",
+        f"- run_seed: `{run_seed}`",
         f"- Pareto front: {', '.join(pareto_front) or '(none)'}",
         "- principle: schemes evolve in parallel and are never merged.",
         "",

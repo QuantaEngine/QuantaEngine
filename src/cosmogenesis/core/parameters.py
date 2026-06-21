@@ -79,7 +79,13 @@ class ParameterVector:
     def to_normalized(self) -> list[float]:
         out = []
         for axis, v in zip(AXES, self.values, strict=True):
-            lo, hi = axis.lo, axis.hi
+            if axis.log:
+                if axis.lo <= 0.0:
+                    raise ValueError(f"log axis {axis.name!r} requires a positive lower bound")
+                lo, hi = math.log10(axis.lo), math.log10(axis.hi)
+                v = math.log10(max(v, axis.lo))
+            else:
+                lo, hi = axis.lo, axis.hi
             span = hi - lo or 1.0
             out.append((v - lo) / span)
         return out
@@ -88,8 +94,15 @@ class ParameterVector:
     def from_normalized(cls, normalized: list[float]) -> ParameterVector:
         values = []
         for axis, n in zip(AXES, normalized, strict=True):
-            span = axis.hi - axis.lo or 1.0
-            values.append(axis.lo + min(1.0, max(0.0, n)) * span)
+            clipped = min(1.0, max(0.0, n))
+            if axis.log:
+                if axis.lo <= 0.0:
+                    raise ValueError(f"log axis {axis.name!r} requires a positive lower bound")
+                lo, hi = math.log10(axis.lo), math.log10(axis.hi)
+                values.append(10.0 ** (lo + clipped * (hi - lo)))
+            else:
+                span = axis.hi - axis.lo or 1.0
+                values.append(axis.lo + clipped * span)
         return cls(values)
 
 

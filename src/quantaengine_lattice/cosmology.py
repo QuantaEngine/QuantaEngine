@@ -29,12 +29,7 @@ class FriedmannBackground:
 
     def e2(self, a: float) -> float:
         p = self.params
-        return (
-            p.omega_r / a**4
-            + p.omega_m / a**3
-            + p.omega_k / a**2
-            + p.omega_lambda
-        )
+        return p.omega_r / a**4 + p.omega_m / a**3 + p.omega_k / a**2 + p.omega_lambda
 
     def hubble(self, a: float | None = None) -> float:
         if a is None:
